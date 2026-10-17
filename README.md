@@ -22,3 +22,13 @@ A 2D isometric mobile resort management game developed by **LIZO Project**.
 ## Development
 
 Team members should work on separate branches and submit their changes through Pull Requests.
+
+## Assets & Attribution
+
+The visual assets used in Resort Empire are generated using **OpenAI's ChatGPT** and prepared for integration into Unity by **LIZO Project**.
+
+The project is currently developed for non-commercial educational purposes. No third-party asset packs have been used.
+
+AI-generated assets are used in accordance with [OpenAI's Terms of Use](https://openai.com/policies/terms-of-use/) and applicable copyright laws.
+
+Any third-party assets added in the future will be documented with their respective sources and licenses.
