@@ -32,3 +32,25 @@ The project is currently developed for non-commercial educational purposes. No t
 AI-generated assets are used in accordance with [OpenAI's Terms of Use](https://openai.com/policies/terms-of-use/) and applicable copyright laws.
 
 Any third-party assets added in the future will be documented with their respective sources and licenses.
+
+## Git Workflow
+
+The Resort Empire project follows the **classic GitFlow branching model**.
+
+- `main` – stable releases of the project.
+- `develop` – main integration branch for ongoing development.
+- `feature/*` – individual feature and task development, branched from and merged into `develop`.
+- `release/*` – preparation of new releases.
+- `hotfix/*` – urgent fixes for released versions.
+
+All new development work is integrated into `develop` through Pull Requests and code review.
+
+### GitFlow Adoption
+
+During the initial phase of Sprint 1, the team used feature branches and Pull Requests targeting `main`.
+
+On **October 19, 2026**, following the clarification of the required branching methodology, the team transitioned to classic GitFlow. The `develop` branch was created from the existing `main` branch, configured as the default branch, and the updated workflow was communicated to all team members.
+
+Previous Pull Requests and commits have been preserved to maintain a transparent project history. All subsequent development follows the GitFlow branching model.
+
+For detailed instructions, see [GitFlow Guide](GITFLOW_GUIDE.md).
