@@ -1,0 +1,299 @@
+fileFormatVersion: 2
+guid: c387ab5f58524b3fadf6691d4f528150
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 451182977400012481
+    second: Guest_01
+  - first:
+      213: 451182977400012482
+    second: Guest_02
+  - first:
+      213: 451182977400012483
+    second: Guest_03
+  - first:
+      213: 451182977400012484
+    second: Guest_04
+  - first:
+      213: 451182977400012485
+    second: Guest_05
+  - first:
+      213: 451182977400012486
+    second: Guest_06
+  - first:
+      213: 451182977400012487
+    second: Guest_07
+  - first:
+      213: 451182977400012488
+    second: Guest_08
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 100
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 0
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 100
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Guest_01
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 249
+        width: 130
+        height: 163
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 415c7919ec584b6aaa8b1b7cbb661d32
+      internalID: 451182977400012481
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Guest_02
+      rect:
+        serializedVersion: 2
+        x: 130
+        y: 249
+        width: 129
+        height: 163
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e237a33b45de4e1ba8a7e066f1d7fe2c
+      internalID: 451182977400012482
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Guest_03
+      rect:
+        serializedVersion: 2
+        x: 259
+        y: 249
+        width: 127
+        height: 163
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 764109b5c54c4ddca4652c69a83196c9
+      internalID: 451182977400012483
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Guest_04
+      rect:
+        serializedVersion: 2
+        x: 386
+        y: 249
+        width: 126
+        height: 163
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 69453c62ad7943c8949459ecea8e35bb
+      internalID: 451182977400012484
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Guest_05
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 86
+        width: 130
+        height: 160
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d112ad683fbf44d1a544b050cfcf8044
+      internalID: 451182977400012485
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Guest_06
+      rect:
+        serializedVersion: 2
+        x: 130
+        y: 86
+        width: 129
+        height: 160
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e7b3f57598bc451c946c992921eaf381
+      internalID: 451182977400012486
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Guest_07
+      rect:
+        serializedVersion: 2
+        x: 259
+        y: 86
+        width: 127
+        height: 160
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 216e959568c84f24b64a738069489b91
+      internalID: 451182977400012487
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Guest_08
+      rect:
+        serializedVersion: 2
+        x: 386
+        y: 86
+        width: 126
+        height: 160
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 905290e642c246aebd57f3e5d7a16c80
+      internalID: 451182977400012488
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    nameFileIdTable:
+      Guest_01: 451182977400012481
+      Guest_02: 451182977400012482
+      Guest_03: 451182977400012483
+      Guest_04: 451182977400012484
+      Guest_05: 451182977400012485
+      Guest_06: 451182977400012486
+      Guest_07: 451182977400012487
+      Guest_08: 451182977400012488
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: Eight visitor badges from the supplied Guests.png. Original PNG pixels are unchanged.
+  assetBundleName: 
+  assetBundleVariant: 

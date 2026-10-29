@@ -1,0 +1,12 @@
+{
+  "waves": [
+    { "waveNumber": 1, "guestCount": 12, "rooms": 8,  "drinks": 8,  "food": 6,  "relax": 0,  "oceanView": 0 },
+    { "waveNumber": 2, "guestCount": 18, "rooms": 12, "drinks": 16, "food": 10, "relax": 0,  "oceanView": 0 },
+    { "waveNumber": 3, "guestCount": 24, "rooms": 16, "drinks": 18, "food": 14, "relax": 0,  "oceanView": 0 },
+    { "waveNumber": 4, "guestCount": 26, "rooms": 16, "drinks": 18, "food": 14, "relax": 8,  "oceanView": 0 },
+    { "waveNumber": 5, "guestCount": 34, "rooms": 20, "drinks": 22, "food": 18, "relax": 16, "oceanView": 0 },
+    { "waveNumber": 6, "guestCount": 40, "rooms": 25, "drinks": 28, "food": 22, "relax": 20, "oceanView": 0 },
+    { "waveNumber": 7, "guestCount": 42, "rooms": 25, "drinks": 28, "food": 22, "relax": 20, "oceanView": 10 },
+    { "waveNumber": 8, "guestCount": 52, "rooms": 31, "drinks": 35, "food": 28, "relax": 25, "oceanView": 16 }
+  ]
+}

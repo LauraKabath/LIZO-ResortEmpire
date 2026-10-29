@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -15,6 +16,9 @@ public sealed class TapInputRouter : MonoBehaviour
     [Header("Camera dragging")]
     [Tooltip("Movement in screen pixels before a press becomes a camera drag.")]
     [SerializeField, Min(0f)] private float dragThresholdPixels = 12f;
+
+    public event Action<Vector2> WorldTapped;
+    public event Action<Vector2> UiPressed;
 
     private readonly List<RaycastResult> uiHits = new List<RaycastResult>();
     private bool isTracking;
@@ -114,7 +118,10 @@ public sealed class TapInputRouter : MonoBehaviour
     {
         ResetGesture();
         if (IsOverUI(screenPosition))
+        {
+            UiPressed?.Invoke(screenPosition);
             return;
+        }
 
         isTracking = true;
         pressPosition = screenPosition;
@@ -180,6 +187,7 @@ public sealed class TapInputRouter : MonoBehaviour
 
     private void TryTap(Vector2 screenPosition)
     {
+        WorldTapped?.Invoke(screenPosition);
         Vector3 worldPosition = worldCamera.ScreenToWorldPoint(screenPosition);
         Collider2D hit = Physics2D.OverlapPoint(
             new Vector2(worldPosition.x, worldPosition.y), targetLayers);
