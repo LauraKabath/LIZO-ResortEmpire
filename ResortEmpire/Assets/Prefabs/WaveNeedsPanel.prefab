@@ -60,7 +60,7 @@ MonoBehaviour:
     root: {fileID: 2233051857441624187}
     valueText: {fileID: 3311617693971131042}
   - need: 1
-    label: Foods
+    label: Food
     root: {fileID: 5524666091721650795}
     valueText: {fileID: 1111269404633985752}
 --- !u!1 &2033896996343164868
