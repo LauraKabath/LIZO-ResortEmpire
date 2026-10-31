@@ -4039,6 +4039,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 1a02747f6c2bda3408ded9427063505c, type: 2}
   - {fileID: 11400000, guid: b3e8be4e09b34e04ba2418786d14403e, type: 2}
   - {fileID: 11400000, guid: 8b1e3e910c60b314aa21f80405c9f63a, type: 2}
+  initialSettings: {fileID: 11400000, guid: 4ad187b24ef387b46b14cdfcdff63312, type: 2}
   waveDefinitionsFile: {fileID: 4900000, guid: 073284b1c6944828a04947050ed58f3b, type: 3}
   waveDurationSeconds: 90
   startingCoins: 100

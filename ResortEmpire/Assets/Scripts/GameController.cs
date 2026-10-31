@@ -8,6 +8,10 @@ public sealed class GameController : MonoBehaviour
 {
     [Header("Building definitions")]
     [SerializeField] private BuildingDefinition[] buildingDefinitions;
+    
+    [Header("New game initialization")]
+    [SerializeField]
+    private ResortInitialSettings initialSettings;
 
     [Header("Wave settings")]
     [SerializeField] private TextAsset waveDefinitionsFile;
@@ -46,8 +50,10 @@ public sealed class GameController : MonoBehaviour
         try
         {
             // Persistence will plug in here; each Play currently creates a fresh prototype.
-            resortData = ResortData.CreatePrototypeStart(
-                startingCoins, startingEnergy, startingResortValue);
+            resortData = initialSettings != null
+                ? ResortInitializer.CreateNewGame(initialSettings)
+                : ResortData.CreatePrototypeStart(
+                    startingCoins, startingEnergy, startingResortValue);
             LoadBuildingDefinitions();
             if (waveDefinitionsFile == null)
                 throw new InvalidOperationException("Assign the wave definitions JSON file in the Inspector.");
