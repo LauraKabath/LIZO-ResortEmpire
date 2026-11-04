@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -25,6 +26,10 @@ public sealed class BuildingDetailsUI : MonoBehaviour
     private BuildingTapTarget selected;
     private WaveData displayedWave;
     private Vector3 popupWorldAnchor;
+    private Vector2 lastWorldTap;
+
+    // Lets panels such as Worker Allocation react to the building chosen by a tap.
+    public event Action<BuildingType> BuildingSelected;
 
     private void Awake()
     {
@@ -41,6 +46,7 @@ public sealed class BuildingDetailsUI : MonoBehaviour
     private void OnEnable()
     {
         if (tapInputRouter == null) return;
+        tapInputRouter.WorldTapped += RememberTap;
         tapInputRouter.WorldTapped += DismissOutside;
         tapInputRouter.UiPressed += DismissOutside;
     }
@@ -49,6 +55,7 @@ public sealed class BuildingDetailsUI : MonoBehaviour
     {
         if (tapInputRouter != null)
         {
+            tapInputRouter.WorldTapped -= RememberTap;
             tapInputRouter.WorldTapped -= DismissOutside;
             tapInputRouter.UiPressed -= DismissOutside;
         }
@@ -74,8 +81,11 @@ public sealed class BuildingDetailsUI : MonoBehaviour
         }
         // Convert the UI gap once; the resulting anchor stays fixed in the world.
         screen.y += buildingOffset * canvasRect.lossyScale.y;
+        BuildingData state = gameController.Data.GetBuilding(building.Type);
+        if (state != null && !state.owned) screen = GetTapAnchor(screen.z);
         popupWorldAnchor = worldCamera.ScreenToWorldPoint(screen);
         RefreshPopup();
+        if (selected != null) BuildingSelected?.Invoke(selected.Type);
     }
 
     public void Hide()
@@ -83,6 +93,18 @@ public sealed class BuildingDetailsUI : MonoBehaviour
         selected = null;
         ClearBindings();
         if (popupView != null) popupView.gameObject.SetActive(false);
+    }
+
+    private void RememberTap(Vector2 screenPosition) => lastWorldTap = screenPosition;
+
+    // Locked plots are large areas, so their popup opens at the tap, kept fully on screen.
+    private Vector3 GetTapAnchor(float depth)
+    {
+        Vector2 size = popupView.PopupRect.rect.size * canvasRect.lossyScale.y;
+        return new Vector3(
+            Mathf.Clamp(lastWorldTap.x, size.x * 0.5f, Screen.width - size.x * 0.5f),
+            Mathf.Min(lastWorldTap.y + buildingOffset * canvasRect.lossyScale.y, Screen.height - size.y),
+            depth);
     }
 
     private void DismissOutside(Vector2 screenPosition)
@@ -116,7 +138,7 @@ public sealed class BuildingDetailsUI : MonoBehaviour
             ClearBindings();
         }
         BindUnits(displayedWave?.GetNeed(definition.ServicedNeed));
-        popupView.SetBuildingName(definition.DisplayName);
+        popupView.SetBuildingName(state.owned ? definition.DisplayName : definition.DisplayName + " (Locked)");
         foreach (Slot slot in slots)
         {
             if (state.owned && slot.unit != null)

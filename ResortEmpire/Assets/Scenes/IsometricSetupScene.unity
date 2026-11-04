@@ -141,6 +141,8 @@ GameObject:
   - component: {fileID: 138829240}
   - component: {fileID: 138829242}
   - component: {fileID: 138829241}
+  - component: {fileID: 138829244}
+  - component: {fileID: 138829243}
   m_Layer: 0
   m_Name: Pool_locked
   m_TagString: Untagged
@@ -157,7 +159,7 @@ Transform:
   m_GameObject: {fileID: 138829239}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -725,6 +727,60 @@ Tilemap:
     e31: 0
     e32: 0
     e33: 1
+--- !u!114 &138829243
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 138829239}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0abe3c7762cc4301b7afd676f1e3fc16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BuildingTapTarget
+  buildingType: 3
+  detailsUI: {fileID: 638455458}
+  buildingRenderer: {fileID: 138829241}
+  anchorOffset: {x: 0, y: 0.12, z: 0}
+--- !u!19719996 &138829244
+TilemapCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 138829239}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0}
+  m_MaximumTileChangeCount: 1000
+  m_ExtrusionFactor: 0
+  m_UseDelaunayMesh: 0
 --- !u!114 &268354821 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 7630864468024434667, guid: e228d6ac97ec77a45b8078c7e97b2369, type: 3}
@@ -747,6 +803,56 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
+--- !u!1 &638455457
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 638455459}
+  - component: {fileID: 638455458}
+  m_Layer: 0
+  m_Name: Building Details UI
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &638455458
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 638455457}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 78b99d1c0096474aa4dd93065e60f582, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BuildingDetailsUI
+  gameController: {fileID: 677912519}
+  tapInputRouter: {fileID: 697595500}
+  worldCamera: {fileID: 888047622}
+  canvasRect: {fileID: 1773876354}
+  popupView: {fileID: 1700321966}
+  buildingOffset: 12
+--- !u!4 &638455459
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 638455457}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &677912518
 GameObject:
   m_ObjectHideFlags: 0
@@ -1115,6 +1221,8 @@ GameObject:
   - component: {fileID: 967900890}
   - component: {fileID: 967900892}
   - component: {fileID: 967900891}
+  - component: {fileID: 967900894}
+  - component: {fileID: 967900893}
   m_Layer: 0
   m_Name: Bungalow_locked
   m_TagString: Untagged
@@ -1131,7 +1239,7 @@ Transform:
   m_GameObject: {fileID: 967900889}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.08, z: 0}
+  m_LocalPosition: {x: 0, y: 0.08, z: 0.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2257,6 +2365,60 @@ Tilemap:
     e31: 0
     e32: 0
     e33: 1
+--- !u!114 &967900893
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 967900889}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0abe3c7762cc4301b7afd676f1e3fc16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BuildingTapTarget
+  buildingType: 4
+  detailsUI: {fileID: 638455458}
+  buildingRenderer: {fileID: 967900891}
+  anchorOffset: {x: 0, y: 0.12, z: 0}
+--- !u!19719996 &967900894
+TilemapCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 967900889}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0}
+  m_MaximumTileChangeCount: 1000
+  m_ExtrusionFactor: 0
+  m_UseDelaunayMesh: 0
 --- !u!114 &975266747 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 5431663491996807316, guid: e228d6ac97ec77a45b8078c7e97b2369, type: 3}
@@ -2931,6 +3093,7 @@ GameObject:
   - component: {fileID: 1496339536}
   - component: {fileID: 1496339535}
   - component: {fileID: 1496339537}
+  - component: {fileID: 1496339538}
   m_Layer: 0
   m_Name: ReceptionLv1_0
   m_TagString: Untagged
@@ -3166,6 +3329,22 @@ PolygonCollider2D:
     - - {x: -0.22, y: 0.81}
       - {x: -0.22999999, y: 0.79999995}
   m_UseDelaunayMesh: 1
+--- !u!114 &1496339538
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1496339534}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0abe3c7762cc4301b7afd676f1e3fc16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BuildingTapTarget
+  buildingType: 0
+  detailsUI: {fileID: 638455458}
+  buildingRenderer: {fileID: 1496339535}
+  anchorOffset: {x: 0, y: 0.12, z: 0}
 --- !u!1 &1581885824
 GameObject:
   m_ObjectHideFlags: 0
@@ -3757,6 +3936,119 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
+--- !u!1001 &1700321965
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1773876354}
+    m_Modifications:
+    - target: {fileID: 1072874222920578301, guid: 9f4c76bfe5138024c9baaf71f81686a9, type: 3}
+      propertyPath: m_Name
+      value: Building Popup
+      objectReference: {fileID: 0}
+    - target: {fileID: 1403139187572302605, guid: 9f4c76bfe5138024c9baaf71f81686a9, type: 3}
+      propertyPath: m_Pivot.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1403139187572302605, guid: 9f4c76bfe5138024c9baaf71f81686a9, type: 3}
+      propertyPath: m_Pivot.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1403139187572302605, guid: 9f4c76bfe5138024c9baaf71f81686a9, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1403139187572302605, guid: 9f4c76bfe5138024c9baaf71f81686a9, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1403139187572302605, guid: 9f4c76bfe5138024c9baaf71f81686a9, type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1403139187572302605, guid: 9f4c76bfe5138024c9baaf71f81686a9, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1403139187572302605, guid: 9f4c76bfe5138024c9baaf71f81686a9, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 480
+      objectReference: {fileID: 0}
+    - target: {fileID: 1403139187572302605, guid: 9f4c76bfe5138024c9baaf71f81686a9, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 320
+      objectReference: {fileID: 0}
+    - target: {fileID: 1403139187572302605, guid: 9f4c76bfe5138024c9baaf71f81686a9, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1403139187572302605, guid: 9f4c76bfe5138024c9baaf71f81686a9, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1403139187572302605, guid: 9f4c76bfe5138024c9baaf71f81686a9, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1403139187572302605, guid: 9f4c76bfe5138024c9baaf71f81686a9, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1403139187572302605, guid: 9f4c76bfe5138024c9baaf71f81686a9, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1403139187572302605, guid: 9f4c76bfe5138024c9baaf71f81686a9, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1403139187572302605, guid: 9f4c76bfe5138024c9baaf71f81686a9, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1403139187572302605, guid: 9f4c76bfe5138024c9baaf71f81686a9, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1403139187572302605, guid: 9f4c76bfe5138024c9baaf71f81686a9, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1403139187572302605, guid: 9f4c76bfe5138024c9baaf71f81686a9, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1403139187572302605, guid: 9f4c76bfe5138024c9baaf71f81686a9, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1403139187572302605, guid: 9f4c76bfe5138024c9baaf71f81686a9, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 9f4c76bfe5138024c9baaf71f81686a9, type: 3}
+--- !u!114 &1700321966 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2004551467406105166, guid: 9f4c76bfe5138024c9baaf71f81686a9, type: 3}
+  m_PrefabInstance: {fileID: 1700321965}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 558f0163c08c4f4c8987086c828209ad, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BuildingPopupView
+--- !u!224 &1700321967 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 1403139187572302605, guid: 9f4c76bfe5138024c9baaf71f81686a9, type: 3}
+  m_PrefabInstance: {fileID: 1700321965}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &1746893476 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 6491039620560286622, guid: e228d6ac97ec77a45b8078c7e97b2369, type: 3}
@@ -3863,6 +4155,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1098565359}
+  - {fileID: 1700321967}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -3881,6 +4174,7 @@ GameObject:
   - component: {fileID: 1853325444}
   - component: {fileID: 1853325443}
   - component: {fileID: 1853325445}
+  - component: {fileID: 1853325446}
   m_Layer: 0
   m_Name: BeachBarLv1_0
   m_TagString: Untagged
@@ -4110,6 +4404,22 @@ PolygonCollider2D:
       - {x: -0.555, y: 0.95}
       - {x: -0.565, y: 0.96999997}
   m_UseDelaunayMesh: 1
+--- !u!114 &1853325446
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1853325442}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0abe3c7762cc4301b7afd676f1e3fc16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BuildingTapTarget
+  buildingType: 2
+  detailsUI: {fileID: 638455458}
+  buildingRenderer: {fileID: 1853325443}
+  anchorOffset: {x: 0, y: 0.12, z: 0}
 --- !u!1001 &2009680730
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4463,6 +4773,7 @@ GameObject:
   - component: {fileID: 2095811875}
   - component: {fileID: 2095811874}
   - component: {fileID: 2095811876}
+  - component: {fileID: 2095811877}
   m_Layer: 0
   m_Name: RestaurantLv1_0
   m_TagString: Untagged
@@ -4691,6 +5002,22 @@ PolygonCollider2D:
       - {x: -0.22, y: 0.555}
       - {x: -0.24, y: 0.555}
   m_UseDelaunayMesh: 1
+--- !u!114 &2095811877
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2095811873}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0abe3c7762cc4301b7afd676f1e3fc16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BuildingTapTarget
+  buildingType: 1
+  detailsUI: {fileID: 638455458}
+  buildingRenderer: {fileID: 2095811874}
+  anchorOffset: {x: 0, y: 0.12, z: 0}
 --- !u!1001 &2103149180336663242
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -34993,3 +35320,4 @@ SceneRoots:
   - {fileID: 1853325444}
   - {fileID: 2095811875}
   - {fileID: 677912520}
+  - {fileID: 638455459}

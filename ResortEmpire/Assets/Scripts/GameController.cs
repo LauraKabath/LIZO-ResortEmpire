@@ -39,6 +39,7 @@ public sealed class GameController : MonoBehaviour
     public bool IsInitialized => session != null;
     public ResortData Data => resortData;
     public WaveData ActiveWave => activeWaveData;
+    public WorkerRoster Workers { get; private set; }
     public ResortPhase Phase => session?.Phase ?? ResortPhase.AWAITING_WAVE;
     public bool CanStartWave => IsInitialized && session.CanStartWave &&
         waveCatalog.GetWave(Data.nextWaveNumber) != null;
@@ -61,6 +62,7 @@ public sealed class GameController : MonoBehaviour
             if (waveCatalog == null)
                 throw new InvalidOperationException("The wave definitions file is empty or invalid.");
             waveCatalog.Validate();
+            Workers = new WorkerRoster(resortData, GetBuildingDefinition);
             session = new ResortSession(resortData);
             session.PhaseChanged += HandlePhaseChanged;
             HandlePhaseChanged(session.Phase);
