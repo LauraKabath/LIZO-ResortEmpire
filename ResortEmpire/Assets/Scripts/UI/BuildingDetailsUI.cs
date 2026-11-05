@@ -10,9 +10,12 @@ public sealed class BuildingDetailsUI : MonoBehaviour
     [SerializeField] private GameController gameController;
     [SerializeField] private TapInputRouter tapInputRouter;
     [SerializeField] private Camera worldCamera;
+    [Tooltip("The popup's parent. It stays inside this area, so use the Safe Area when the scene has one.")]
     [SerializeField] private RectTransform canvasRect;
     [SerializeField] private BuildingPopupView popupView;
     [SerializeField, Min(0)] private float buildingOffset = 12;
+    [Tooltip("UI the popup must not cover. Inactive objects are ignored.")]
+    [SerializeField] private RectTransform[] avoidedUI = new RectTransform[0];
 
     private sealed class Slot
     {
@@ -23,10 +26,9 @@ public sealed class BuildingDetailsUI : MonoBehaviour
     private readonly List<Slot> slots = new List<Slot>();
     private readonly Dictionary<NeedUnit, Sprite> guestPortraits = new Dictionary<NeedUnit, Sprite>();
     private readonly System.Random portraitRandom = new System.Random();
+    private readonly List<Rect> avoidedRects = new List<Rect>();
     private BuildingTapTarget selected;
     private WaveData displayedWave;
-    private Vector3 popupWorldAnchor;
-    private Vector2 lastWorldTap;
 
     // Lets panels such as Worker Allocation react to the building chosen by a tap.
     public event Action<BuildingType> BuildingSelected;
@@ -46,7 +48,6 @@ public sealed class BuildingDetailsUI : MonoBehaviour
     private void OnEnable()
     {
         if (tapInputRouter == null) return;
-        tapInputRouter.WorldTapped += RememberTap;
         tapInputRouter.WorldTapped += DismissOutside;
         tapInputRouter.UiPressed += DismissOutside;
     }
@@ -55,7 +56,6 @@ public sealed class BuildingDetailsUI : MonoBehaviour
     {
         if (tapInputRouter != null)
         {
-            tapInputRouter.WorldTapped -= RememberTap;
             tapInputRouter.WorldTapped -= DismissOutside;
             tapInputRouter.UiPressed -= DismissOutside;
         }
@@ -72,18 +72,20 @@ public sealed class BuildingDetailsUI : MonoBehaviour
     {
         if (!isActiveAndEnabled || building == null || gameController == null ||
             !gameController.IsInitialized || worldCamera == null) return;
-        Vector3 screen = worldCamera.WorldToScreenPoint(building.AnchorPosition);
-        if (screen.z <= 0) return;
+        BuildingData state = gameController.Data.GetBuilding(building.Type);
+        if (state == null) return;
+        // Locked plots stay selectable for future unlocking, but offer no guest service to show.
+        if (!state.owned)
+        {
+            Hide();
+            BuildingSelected?.Invoke(building.Type);
+            return;
+        }
         if (selected != building)
         {
             selected = building;
             ClearBindings();
         }
-        // Convert the UI gap once; the resulting anchor stays fixed in the world.
-        screen.y += buildingOffset * canvasRect.lossyScale.y;
-        BuildingData state = gameController.Data.GetBuilding(building.Type);
-        if (state != null && !state.owned) screen = GetTapAnchor(screen.z);
-        popupWorldAnchor = worldCamera.ScreenToWorldPoint(screen);
         RefreshPopup();
         if (selected != null) BuildingSelected?.Invoke(selected.Type);
     }
@@ -93,18 +95,6 @@ public sealed class BuildingDetailsUI : MonoBehaviour
         selected = null;
         ClearBindings();
         if (popupView != null) popupView.gameObject.SetActive(false);
-    }
-
-    private void RememberTap(Vector2 screenPosition) => lastWorldTap = screenPosition;
-
-    // Locked plots are large areas, so their popup opens at the tap, kept fully on screen.
-    private Vector3 GetTapAnchor(float depth)
-    {
-        Vector2 size = popupView.PopupRect.rect.size * canvasRect.lossyScale.y;
-        return new Vector3(
-            Mathf.Clamp(lastWorldTap.x, size.x * 0.5f, Screen.width - size.x * 0.5f),
-            Mathf.Min(lastWorldTap.y + buildingOffset * canvasRect.lossyScale.y, Screen.height - size.y),
-            depth);
     }
 
     private void DismissOutside(Vector2 screenPosition)
@@ -138,17 +128,43 @@ public sealed class BuildingDetailsUI : MonoBehaviour
             ClearBindings();
         }
         BindUnits(displayedWave?.GetNeed(definition.ServicedNeed));
-        popupView.SetBuildingName(state.owned ? definition.DisplayName : definition.DisplayName + " (Locked)");
+        popupView.SetBuildingName(definition.DisplayName);
         foreach (Slot slot in slots)
         {
             if (state.owned && slot.unit != null)
                 slot.view.ShowGuest(GetGuestPortrait(slot.unit), (float)slot.unit.serviceProgress);
             else slot.view.ShowEmpty();
         }
-        // The overlay stays above the game while following this fixed world location as the camera pans.
-        bool visible = Project(popupWorldAnchor, out Vector2 position);
+        // The overlay stays above the game while following the building as the camera pans.
+        bool visible = TryPlacePopup(out Vector2 position);
         popupView.gameObject.SetActive(visible);
         if (visible) popupView.PopupRect.anchoredPosition = position;
+    }
+
+    // Returns false while the building is off screen; the popup comes back when the camera does.
+    private bool TryPlacePopup(out Vector2 position)
+    {
+        position = default;
+        Bounds bounds = selected.VisualBounds;
+        if (!Project(bounds.min, out Vector2 min) || !Project(bounds.max, out Vector2 max) ||
+            !Project(selected.AnchorPosition, out Vector2 top)) return false;
+        Rect area = canvasRect.rect;
+        Rect target = Rect.MinMaxRect(min.x, min.y, max.x, Mathf.Max(max.y, top.y));
+        if (!target.Overlaps(area)) return false;
+
+        avoidedRects.Clear();
+        foreach (RectTransform ui in avoidedUI)
+        {
+            if (ui == null || !ui.gameObject.activeInHierarchy) continue;
+            Bounds uiBounds = RectTransformUtility.CalculateRelativeRectTransformBounds(canvasRect, ui);
+            avoidedRects.Add(new Rect(uiBounds.min, uiBounds.size));
+        }
+
+        RectTransform popup = popupView.PopupRect;
+        Rect placed = PopupPlacement.Place(popup.rect.size, target, area, avoidedRects, buildingOffset);
+        Vector2 parentAnchor = area.min + Vector2.Scale(area.size, popup.anchorMin);
+        position = placed.min + Vector2.Scale(placed.size, popup.pivot) - parentAnchor;
+        return true;
     }
 
     private void BindUnits(WaveNeedData need)
