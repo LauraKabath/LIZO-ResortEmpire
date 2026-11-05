@@ -108,6 +108,10 @@ MonoBehaviour:
   - {fileID: 451182977400012486, guid: c387ab5f58524b3fadf6691d4f528150, type: 3}
   - {fileID: 451182977400012487, guid: c387ab5f58524b3fadf6691d4f528150, type: 3}
   - {fileID: 451182977400012488, guid: c387ab5f58524b3fadf6691d4f528150, type: 3}
+  - {fileID: 451182977400012489, guid: c387ab5f58524b3fadf6691d4f528150, type: 3}
+  - {fileID: 451182977400012490, guid: c387ab5f58524b3fadf6691d4f528150, type: 3}
+  - {fileID: 451182977400012491, guid: c387ab5f58524b3fadf6691d4f528150, type: 3}
+  - {fileID: 451182977400012492, guid: c387ab5f58524b3fadf6691d4f528150, type: 3}
   maximumSlotSize: 86
   slotSpacing: 12
   previewBuildingName: Reception

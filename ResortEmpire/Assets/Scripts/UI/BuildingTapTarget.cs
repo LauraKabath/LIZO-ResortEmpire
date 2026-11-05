@@ -18,6 +18,9 @@ public sealed class BuildingTapTarget : MonoBehaviour, ITapTarget
             return new Vector3(bounds.center.x, bounds.max.y, bounds.center.z) + anchorOffset;
         }
     }
+    public Bounds VisualBounds => buildingRenderer != null
+        ? buildingRenderer.bounds
+        : new Bounds(transform.position, Vector3.zero);
 
     private void Awake()
     {
