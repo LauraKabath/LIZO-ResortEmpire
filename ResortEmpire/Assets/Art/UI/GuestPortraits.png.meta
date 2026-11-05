@@ -26,6 +26,18 @@ TextureImporter:
   - first:
       213: 451182977400012488
     second: Guest_08
+  - first:
+      213: 451182977400012489
+    second: Guest_09
+  - first:
+      213: 451182977400012490
+    second: Guest_10
+  - first:
+      213: 451182977400012491
+    second: Guest_11
+  - first:
+      213: 451182977400012492
+    second: Guest_12
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -101,9 +113,9 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 249
-        width: 130
-        height: 163
+        y: 320
+        width: 160
+        height: 160
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -122,10 +134,10 @@ TextureImporter:
       name: Guest_02
       rect:
         serializedVersion: 2
-        x: 130
-        y: 249
-        width: 129
-        height: 163
+        x: 160
+        y: 320
+        width: 160
+        height: 160
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -144,10 +156,10 @@ TextureImporter:
       name: Guest_03
       rect:
         serializedVersion: 2
-        x: 259
-        y: 249
-        width: 127
-        height: 163
+        x: 320
+        y: 320
+        width: 160
+        height: 160
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -166,10 +178,10 @@ TextureImporter:
       name: Guest_04
       rect:
         serializedVersion: 2
-        x: 386
-        y: 249
-        width: 126
-        height: 163
+        x: 480
+        y: 320
+        width: 160
+        height: 160
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -189,8 +201,8 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 86
-        width: 130
+        y: 160
+        width: 160
         height: 160
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
@@ -210,9 +222,9 @@ TextureImporter:
       name: Guest_06
       rect:
         serializedVersion: 2
-        x: 130
-        y: 86
-        width: 129
+        x: 160
+        y: 160
+        width: 160
         height: 160
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
@@ -232,9 +244,9 @@ TextureImporter:
       name: Guest_07
       rect:
         serializedVersion: 2
-        x: 259
-        y: 86
-        width: 127
+        x: 320
+        y: 160
+        width: 160
         height: 160
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
@@ -254,9 +266,9 @@ TextureImporter:
       name: Guest_08
       rect:
         serializedVersion: 2
-        x: 386
-        y: 86
-        width: 126
+        x: 480
+        y: 160
+        width: 160
         height: 160
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
@@ -268,6 +280,94 @@ TextureImporter:
       bones: []
       spriteID: 905290e642c246aebd57f3e5d7a16c80
       internalID: 451182977400012488
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Guest_09
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 160
+        height: 160
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 14d8e887e4e2430e9924425ea859a60c
+      internalID: 451182977400012489
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Guest_10
+      rect:
+        serializedVersion: 2
+        x: 160
+        y: 0
+        width: 160
+        height: 160
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 88191dad100f4ca58d92180eb2f44b9f
+      internalID: 451182977400012490
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Guest_11
+      rect:
+        serializedVersion: 2
+        x: 320
+        y: 0
+        width: 160
+        height: 160
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 49c2a3f08b7d4de08e36d591a955c28e
+      internalID: 451182977400012491
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Guest_12
+      rect:
+        serializedVersion: 2
+        x: 480
+        y: 0
+        width: 160
+        height: 160
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ee1d53c0cbce43339e9f2007ca3220f4
+      internalID: 451182977400012492
       vertices: []
       indices: 
       edges: []
@@ -292,6 +392,10 @@ TextureImporter:
       Guest_06: 451182977400012486
       Guest_07: 451182977400012487
       Guest_08: 451182977400012488
+      Guest_09: 451182977400012489
+      Guest_10: 451182977400012490
+      Guest_11: 451182977400012491
+      Guest_12: 451182977400012492
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: Eight visitor badges from the supplied Guests.png. Original PNG pixels are unchanged.
