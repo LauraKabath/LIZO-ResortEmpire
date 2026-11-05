@@ -4,8 +4,9 @@ using UnityEngine;
 // Pure layout rule, independent of scene objects. All rects share one coordinate space.
 public static class PopupPlacement
 {
-    // Tries above, below, right and left of the target. The first spot that leaves the target
-    // visible wins; otherwise the first spot that at least stays clear of the other UI.
+    // Tries above, below, right and left of the target and takes the spot with the most room around
+    // it, so the popup can follow a panning camera for as long as possible. Covering the target is
+    // the last resort, used only when no other spot stays clear of the other UI.
     public static Rect Place(Vector2 size, Rect target, Rect area, IReadOnlyList<Rect> avoided, float gap)
     {
         float centeredX = target.center.x - size.x * 0.5f;
@@ -18,15 +19,47 @@ public static class PopupPlacement
             new Vector2(target.xMin - gap - size.x, centeredY)
         };
 
+        Rect? best = null;
         Rect? clearOfUI = null;
+        float bestRoom = float.MinValue;
         foreach (Vector2 position in preferred)
         {
             Rect spot = Fit(new Rect(position, size), area, avoided, gap);
             if (Overlaps(spot, avoided)) continue;
-            if (!spot.Overlaps(target)) return spot;
-            if (clearOfUI == null) clearOfUI = spot;
+            if (spot.Overlaps(target))
+            {
+                if (clearOfUI == null) clearOfUI = spot;
+                continue;
+            }
+            float room = RoomAround(spot, area, avoided);
+            if (room <= bestRoom) continue;
+            bestRoom = room;
+            best = spot;
         }
-        return clearOfUI ?? Clamp(new Rect(preferred[0], size), area);
+        return best ?? clearOfUI ?? Clamp(new Rect(preferred[0], size), area);
+    }
+
+    // The shortest distance from the spot to the area's edges and the other UI.
+    private static float RoomAround(Rect spot, Rect area, IReadOnlyList<Rect> avoided)
+    {
+        float room = Mathf.Min(spot.xMin - area.xMin, area.xMax - spot.xMax,
+            spot.yMin - area.yMin, area.yMax - spot.yMax);
+        foreach (Rect ui in avoided)
+        {
+            float apartX = Mathf.Max(ui.xMin - spot.xMax, spot.xMin - ui.xMax);
+            float apartY = Mathf.Max(ui.yMin - spot.yMax, spot.yMin - ui.yMax);
+            room = Mathf.Min(room, Mathf.Max(apartX, apartY));
+        }
+        return room;
+    }
+
+    // Whether a spot is inside the area, allowing for rounding, and clear of the other UI.
+    public static bool Fits(Rect spot, Rect area, IReadOnlyList<Rect> avoided)
+    {
+        const float tolerance = 0.5f;
+        return spot.xMin >= area.xMin - tolerance && spot.xMax <= area.xMax + tolerance &&
+            spot.yMin >= area.yMin - tolerance && spot.yMax <= area.yMax + tolerance &&
+            !Overlaps(spot, avoided);
     }
 
     private static Rect Fit(Rect spot, Rect area, IReadOnlyList<Rect> avoided, float gap)
