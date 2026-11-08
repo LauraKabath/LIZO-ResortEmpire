@@ -338,13 +338,13 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1000124751}
-        m_TargetAssemblyTypeName: 
-        m_MethodName: 
+      - m_Target: {fileID: 735612388}
+        m_TargetAssemblyTypeName: MainMenuController, Assembly-CSharp
+        m_MethodName: NewGame
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: 
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
@@ -467,7 +467,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1000124751
+--- !u!1 &735612387
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -475,63 +475,35 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1000124753}
-  - component: {fileID: 1000124752}
+  - component: {fileID: 735612389}
+  - component: {fileID: 735612388}
   m_Layer: 0
-  m_Name: GameController
+  m_Name: MainMenuController
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1000124752
+--- !u!114 &735612388
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1000124751}
+  m_GameObject: {fileID: 735612387}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8e3531580e68411e9d5ea3c9df28df71, type: 3}
+  m_Script: {fileID: 11500000, guid: 5ea81974f603c2737976da15eb785e01, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::GameController
-  buildingDefinitions: []
-  initialSettings: {fileID: 0}
-  waveDefinitionsFile: {fileID: 0}
-  waveDurationSeconds: 90
-  startingCoins: 100
-  startingEnergy: 5
-  startingResortValue: 0
-  logPhaseChanges: 1
-  logGeneratedNeeds: 1
-  resortData:
-    saveVersion: 1
-    phase: 0
-    nextWaveNumber: 1
-    coins: 0
-    energy: 0
-    resortValue: 0
-    reputation: 0
-    gems: 0
-    materials: 0
-    buildings: []
-    workers: []
-  activeWaveData:
-    waveNumber: 0
-    guestCount: 0
-    arrivalDurationSeconds: 0
-    elapsedSeconds: 0
-    arrivalsClosed: 0
-    isComplete: 0
-    needs: []
---- !u!4 &1000124753
+  m_EditorClassIdentifier: Assembly-CSharp::MainMenuController
+  gameSceneName: IsometricSetupScene
+--- !u!4 &735612389
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1000124751}
+  m_GameObject: {fileID: 735612387}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -0.07325, y: -0.50961, z: 0}
@@ -816,9 +788,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1000124752}
-        m_TargetAssemblyTypeName: GameController, Assembly-CSharp
-        m_MethodName: Load
+      - m_Target: {fileID: 735612388}
+        m_TargetAssemblyTypeName: MainMenuController, Assembly-CSharp
+        m_MethodName: ContinueGame
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -874,4 +846,4 @@ SceneRoots:
   - {fileID: 554894651}
   - {fileID: 1136750414}
   - {fileID: 1231360003}
-  - {fileID: 1000124753}
+  - {fileID: 735612389}
