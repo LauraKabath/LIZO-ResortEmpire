@@ -74,7 +74,7 @@ public sealed class GameController : MonoBehaviour
         }
     }
 
-    private void Load()
+    public void Load()
     {
         // TODO: Make real persistence work. This is a placeholder to demonstrate the flow.
         #if UNITY_ANDROID && !UNITY_EDITOR
