@@ -1,0 +1,495 @@
+fileFormatVersion: 2
+guid: 104a6d5ad3fdadc469acb8bddabc7a34
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -4355902930961080120
+    second: Buttons-workerPanel_0
+  - first:
+      213: -483099651766418151
+    second: Buttons-workerPanel_1
+  - first:
+      213: -698482276869828427
+    second: Buttons-workerPanel_2
+  - first:
+      213: -1394861209089653183
+    second: Buttons-workerPanel_3
+  - first:
+      213: -3468874785353995199
+    second: Buttons-workerPanel_4
+  - first:
+      213: 6707020773231085958
+    second: Buttons-workerPanel_5
+  - first:
+      213: -7069274029340158194
+    second: Buttons-workerPanel_6
+  - first:
+      213: -8914734717841924729
+    second: Buttons-workerPanel_7
+  - first:
+      213: -2031538687215239586
+    second: Buttons-workerPanel_8
+  - first:
+      213: 1648500088459515844
+    second: Buttons-workerPanel_9
+  - first:
+      213: -7207917473698225876
+    second: Buttons-workerPanel_10
+  - first:
+      213: 5115415205125945678
+    second: Buttons-workerPanel_11
+  - first:
+      213: 7528312562622150332
+    second: Buttons-workerPanel_12
+  - first:
+      213: -2568392806566423456
+    second: Buttons-workerPanel_13
+  - first:
+      213: 1522698336828698720
+    second: Buttons-workerPanel_14
+  - first:
+      213: -876194195278054293
+    second: Buttons-workerPanel_15
+  - first:
+      213: 8720709243306092327
+    second: Buttons-workerPanel_16
+  - first:
+      213: 5762338377251928949
+    second: Buttons-workerPanel_17
+  - first:
+      213: -2946667680451370760
+    second: Buttons-workerPanel_18
+  - first:
+      213: 2556586275448789377
+    second: Buttons-workerPanel_19
+  - first:
+      213: -4457451127368649516
+    second: Buttons-workerPanel_20
+  - first:
+      213: 8184350418426421201
+    second: Buttons-workerPanel_21
+  - first:
+      213: -4332970613469316565
+    second: Buttons-workerPanel_22
+  - first:
+      213: 4700712006822461606
+    second: Buttons-workerPanel_23
+  - first:
+      213: 8420822601007796005
+    second: Buttons-workerPanel_24
+  - first:
+      213: -2984232730206108144
+    second: Buttons-workerPanel_25
+  - first:
+      213: -1512096499894407000
+    second: Buttons-workerPanel_26
+  - first:
+      213: -93048178078915267
+    second: Buttons-workerPanel_27
+  - first:
+      213: -4837032826427160130
+    second: Buttons-workerPanel_28
+  - first:
+      213: 5605973856206362435
+    second: Buttons-workerPanel_29
+  - first:
+      213: -7833568212032605042
+    second: Buttons-workerPanel_30
+  - first:
+      213: 5176824825815930908
+    second: Buttons-workerPanel_31
+  - first:
+      213: 1039016890821290229
+    second: Buttons-workerPanel_32
+  - first:
+      213: -5016970132262024617
+    second: Buttons-workerPanel_33
+  - first:
+      213: 1306207141578575104
+    second: Buttons-workerPanel_34
+  - first:
+      213: 1524897370494777097
+    second: Buttons-workerPanel_35
+  - first:
+      213: -775243082989010242
+    second: Buttons-workerPanel_36
+  - first:
+      213: -475326729385133985
+    second: Buttons-workerPanel_37
+  - first:
+      213: -6284293137640947301
+    second: Buttons-workerPanel_38
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 0
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: iOS
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WindowsStoreApps
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Buttons-workerPanel_0
+      rect:
+        serializedVersion: 2
+        x: 17
+        y: 685
+        width: 469
+        height: 224
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8c06bf3ec59bc83c0800000000000000
+      internalID: -4355902930961080120
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Buttons-workerPanel_1
+      rect:
+        serializedVersion: 2
+        x: 498
+        y: 687
+        width: 459
+        height: 218
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 91509512d6fab49f0800000000000000
+      internalID: -483099651766418151
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Buttons-workerPanel_2
+      rect:
+        serializedVersion: 2
+        x: 12
+        y: 431
+        width: 474
+        height: 215
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5b09445e11e7e46f0800000000000000
+      internalID: -698482276869828427
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Buttons-workerPanel_3
+      rect:
+        serializedVersion: 2
+        x: 965
+        y: 690
+        width: 459
+        height: 217
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1464d31ee1574ace0800000000000000
+      internalID: -1394861209089653183
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Buttons-workerPanel_4
+      rect:
+        serializedVersion: 2
+        x: 493
+        y: 436
+        width: 462
+        height: 205
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 14c6aa8f2c41cdfc0800000000000000
+      internalID: -3468874785353995199
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Buttons-workerPanel_5
+      rect:
+        serializedVersion: 2
+        x: 969
+        y: 423
+        width: 462
+        height: 215
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 689ca91abdf141d50800000000000000
+      internalID: 6707020773231085958
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Buttons-workerPanel_6
+      rect:
+        serializedVersion: 2
+        x: 17
+        y: 174
+        width: 466
+        height: 196
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e07194599b4e4ed90800000000000000
+      internalID: -7069274029340158194
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Buttons-workerPanel_7
+      rect:
+        serializedVersion: 2
+        x: 498
+        y: 181
+        width: 457
+        height: 189
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 78d9034a100884480800000000000000
+      internalID: -8914734717841924729
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Buttons-workerPanel_8
+      rect:
+        serializedVersion: 2
+        x: 962
+        y: 189
+        width: 464
+        height: 176
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e5e7219d3568ec3e0800000000000000
+      internalID: -2031538687215239586
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 9f756ad6b0f859c48ac6e02da16c1d4b
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries:
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":3.0,"y":3.0},"gridSpriteSize":{"x":482.0,"y":362.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":2,"keepEmptyRects":false,"isAlternate":false}'
+    nameFileIdTable:
+      Buttons-workerPanel_0: -4355902930961080120
+      Buttons-workerPanel_1: -483099651766418151
+      Buttons-workerPanel_2: -698482276869828427
+      Buttons-workerPanel_3: -1394861209089653183
+      Buttons-workerPanel_4: -3468874785353995199
+      Buttons-workerPanel_5: 6707020773231085958
+      Buttons-workerPanel_6: -7069274029340158194
+      Buttons-workerPanel_7: -8914734717841924729
+      Buttons-workerPanel_8: -2031538687215239586
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

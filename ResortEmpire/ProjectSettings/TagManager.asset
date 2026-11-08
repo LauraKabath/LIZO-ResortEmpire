@@ -44,5 +44,8 @@ TagManager:
   - name: Buildings
     uniqueID: 109373633
     locked: 0
+  - name: UI
+    uniqueID: 3639355269
+    locked: 0
   m_RenderingLayers:
   - Default
