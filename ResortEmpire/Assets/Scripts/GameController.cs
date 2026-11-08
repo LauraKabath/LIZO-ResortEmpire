@@ -74,6 +74,28 @@ public sealed class GameController : MonoBehaviour
         }
     }
 
+    private void Load()
+    {
+        // TODO: Make real persistence work. This is a placeholder to demonstrate the flow.
+        #if UNITY_ANDROID && !UNITY_EDITOR
+            AndroidJavaClass unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
+            AndroidJavaObject unityActivity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
+
+            if (unityActivity != null)
+            {
+                AndroidJavaClass toastClass = new AndroidJavaClass("android.widget.Toast");
+                unityActivity.Call("runOnUiThread", new AndroidJavaRunnable(() =>
+                {
+                    AndroidJavaObject toastObject = toastClass.CallStatic<AndroidJavaObject>("makeText", unityActivity, "Not implemented yet", 0);
+                    toastObject.Call("show");
+                }));
+            }
+        #else
+            // Fallback for Linux standalone or the Unity Editor
+            Debug.Log("[Toast]: Not implemented yet");
+        #endif
+    }
+
     private void Update()
     {
         // Pausing stops both arrivals and service without changing Unity's global time scale.
