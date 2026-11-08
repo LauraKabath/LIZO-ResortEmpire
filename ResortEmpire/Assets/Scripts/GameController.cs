@@ -99,8 +99,7 @@ public sealed class GameController : MonoBehaviour
     [ContextMenu("Wave/Start Wave")]
     public void StartWave()
     {
-        startWaveButton.interactable = false;
-
+        
         if (!EnsureReady()) return;
         if (!session.CanStartWave)
         {
@@ -236,6 +235,10 @@ public sealed class GameController : MonoBehaviour
     {
         if (logPhaseChanges)
             Debug.Log($"Wave {Data.nextWaveNumber}: {phase}", this);
+        
+        if (startWaveButton != null)
+            startWaveButton.interactable = CanStartWave;
+        
         PhaseChanged?.Invoke(phase);
     }
 
