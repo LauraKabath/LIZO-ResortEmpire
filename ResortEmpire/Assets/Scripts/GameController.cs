@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 // Scene entry point. Add this only to scenes that should run a resort session.
 [DisallowMultipleComponent]
@@ -29,6 +30,8 @@ public sealed class GameController : MonoBehaviour
     [Header("Runtime data (created on Play)")]
     [SerializeField] private ResortData resortData;
     [SerializeField] private WaveData activeWaveData;
+
+    [SerializeField] private Button startWaveButton;
 
     private readonly Dictionary<BuildingType, BuildingDefinition> definitions =
         new Dictionary<BuildingType, BuildingDefinition>();
@@ -96,6 +99,7 @@ public sealed class GameController : MonoBehaviour
     [ContextMenu("Wave/Start Wave")]
     public void StartWave()
     {
+        
         if (!EnsureReady()) return;
         if (!session.CanStartWave)
         {
@@ -231,6 +235,10 @@ public sealed class GameController : MonoBehaviour
     {
         if (logPhaseChanges)
             Debug.Log($"Wave {Data.nextWaveNumber}: {phase}", this);
+        
+        if (startWaveButton != null)
+            startWaveButton.interactable = CanStartWave;
+        
         PhaseChanged?.Invoke(phase);
     }
 
