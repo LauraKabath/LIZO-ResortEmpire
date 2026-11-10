@@ -35,14 +35,37 @@ public sealed class WaveDefinition
 }
 
 [Serializable]
+public sealed class WaveRewardSettings
+{
+    // Coins = completed need units × coins per unit × rating multiplier.
+    public int coinsPerNeedUnit;
+    public float[] coinMultipliersByRating; // 1★ through 5★, then Perfect.
+    public int[] energyByStars; // 1★ through 5★. Perfect uses the 5★ entry.
+    public int resortValueGain;
+
+    internal void Validate()
+    {
+        if (coinsPerNeedUnit < 0 || resortValueGain < 0 ||
+            coinMultipliersByRating == null || coinMultipliersByRating.Length != 6 ||
+            Array.Exists(coinMultipliersByRating, value => value < 0 || float.IsNaN(value) || float.IsInfinity(value)) ||
+            energyByStars == null || energyByStars.Length != 5 ||
+            Array.Exists(energyByStars, value => value < 0))
+            throw new ArgumentException("Wave rewards require nonnegative values, six Coin multipliers, and five Energy drops.");
+    }
+}
+
+[Serializable]
 public sealed class WaveCatalog
 {
+    public WaveRewardSettings rewards;
     public WaveDefinition[] waves;
 
     public void Validate()
     {
         if (waves == null || waves.Length == 0)
             throw new ArgumentException("Configure at least one wave in the wave definitions file.");
+
+        rewards?.Validate();
 
         var numbers = new HashSet<int>();
         foreach (WaveDefinition wave in waves)

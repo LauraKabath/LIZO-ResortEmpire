@@ -8,6 +8,7 @@ public sealed class ResortInitialSettings : ScriptableObject
     [SerializeField, Min(0)] private int startingCoins = 100;
     [SerializeField, Min(0)] private int startingEnergy = 5;
     [SerializeField, Min(0)] private int startingResortValue = 0;
+    [SerializeField, Range(0, 99)] private int workerCapPercent = WorkerRoster.DefaultCapPercent;
 
     [Header("MVP-ready resources")]
     [SerializeField, Min(0)] private int startingReputation = 0;
@@ -17,6 +18,7 @@ public sealed class ResortInitialSettings : ScriptableObject
     public int StartingCoins => startingCoins;
     public int StartingEnergy => startingEnergy;
     public int StartingResortValue => startingResortValue;
+    public int WorkerCapPercent => workerCapPercent;
     public int StartingReputation => startingReputation;
     public int StartingGems => startingGems;
     public int StartingMaterials => startingMaterials;

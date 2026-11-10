@@ -65,7 +65,8 @@ public sealed class GameController : MonoBehaviour
             if (waveCatalog == null)
                 throw new InvalidOperationException("The wave definitions file is empty or invalid.");
             waveCatalog.Validate();
-            Workers = new WorkerRoster(resortData, GetBuildingDefinition);
+            Workers = new WorkerRoster(resortData, GetBuildingDefinition,
+                initialSettings != null ? initialSettings.WorkerCapPercent : WorkerRoster.DefaultCapPercent);
             session = new ResortSession(resortData);
             session.PhaseChanged += HandlePhaseChanged;
             HandlePhaseChanged(session.Phase);
@@ -94,6 +95,7 @@ public sealed class GameController : MonoBehaviour
 
     public BuildingDefinition GetBuildingDefinition(BuildingType type) => definitions[type];
     public WaveDefinition GetWaveDefinition(int waveNumber) => waveCatalog?.GetWave(waveNumber);
+    public WaveRewardSettings RewardSettings => waveCatalog?.rewards;
 
     // Void entry points can also be connected directly to UI Button OnClick events.
     [ContextMenu("Wave/Start Wave")]

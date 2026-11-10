@@ -15,6 +15,7 @@ MonoBehaviour:
   startingCoins: 100
   startingEnergy: 5
   startingResortValue: 0
+  workerCapPercent: 80
   startingReputation: 0
   startingGems: 0
   startingMaterials: 0

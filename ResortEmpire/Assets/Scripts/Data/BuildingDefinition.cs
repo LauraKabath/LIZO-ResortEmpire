@@ -10,6 +10,7 @@ public sealed class BuildingDefinition : ScriptableObject
     {
         [Min(1)] public int capacity = 3;
         [Min(1)] public int workerSlots = 1;
+        [Min(0)] public int costCoins;
     }
 
     [SerializeField] private BuildingType type;
@@ -20,8 +21,8 @@ public sealed class BuildingDefinition : ScriptableObject
     [SerializeField] private LevelConfig[] levels =
     {
         new LevelConfig { capacity = 3, workerSlots = 1 },
-        new LevelConfig { capacity = 5, workerSlots = 1 },
-        new LevelConfig { capacity = 7, workerSlots = 1 }
+        new LevelConfig { capacity = 5, workerSlots = 1, costCoins = 500 },
+        new LevelConfig { capacity = 7, workerSlots = 1, costCoins = 1200 }
     };
 
     public BuildingType Type => type;
@@ -33,6 +34,8 @@ public sealed class BuildingDefinition : ScriptableObject
 
     public int GetCapacity(int level) => GetLevel(level).capacity;
     public int GetWorkerSlots(int level) => GetLevel(level).workerSlots;
+    // Lv1 is the purchase price. Later levels store the price to upgrade to that level.
+    public int GetCostCoins(int level) => GetLevel(level).costCoins;
 
     private LevelConfig GetLevel(int level)
     {

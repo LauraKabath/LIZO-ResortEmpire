@@ -15,18 +15,18 @@ public static class ResortInitializer
             throw new ArgumentException("Starting resources cannot be negative.", nameof(settings));
 
         ResortData data = ResortData.CreatePrototypeStart(
-            settings.StartingCoins, settings.StartingEnergy, settings.StartingResortValue);
+            settings.StartingCoins, settings.StartingEnergy, settings.StartingResortValue, settings.WorkerCapPercent);
         data.reputation = settings.StartingReputation;
         data.gems = settings.StartingGems;
         data.materials = settings.StartingMaterials;
         data.phase = ResortPhase.AWAITING_WAVE;
         data.nextWaveNumber = 1;
 
-        ValidateNewGame(data);
+        ValidateNewGame(data, settings.WorkerCapPercent);
         return data;
     }
 
-    public static void ValidateNewGame(ResortData data)
+    public static void ValidateNewGame(ResortData data, int workerCapPercent = WorkerRoster.DefaultCapPercent)
     {
         if (data == null || data.buildings == null || data.workers == null)
             throw new InvalidOperationException("New-game state or its lists are missing.");
@@ -50,6 +50,7 @@ public static class ResortInitializer
 
         var buildingsSeen = new HashSet<BuildingType>();
         var assignedIds = new HashSet<int>();
+        int startingSlots = 0;
         foreach (BuildingData building in data.buildings)
         {
             if (building == null || !expectedOwnership.TryGetValue(building.type, out bool owned) ||
@@ -57,14 +58,16 @@ public static class ResortInitializer
                 throw new InvalidOperationException("Unknown or duplicate building record.");
             if (building.owned != owned || building.availableToPurchase || building.level != 1)
                 throw new InvalidOperationException($"Invalid initial state for {building.type}.");
+            if (owned) startingSlots++;
             if (!building.owned && building.assignedWorkerId != -1)
                 throw new InvalidOperationException("Locked building cannot have a worker.");
             if (building.assignedWorkerId != -1 && !assignedIds.Add(building.assignedWorkerId))
                 throw new InvalidOperationException("A worker occupies more than one building.");
         }
 
-        if (data.workers.Count != 2 || assignedIds.Count != 2)
-            throw new InvalidOperationException("Prototype starts with two assigned workers.");
+        int workerCap = WorkerRoster.CalculateCap(startingSlots, workerCapPercent);
+        if (data.workers.Count != workerCap || assignedIds.Count != workerCap)
+            throw new InvalidOperationException($"Prototype must start with {workerCap} assigned Workers.");
 
         var workerIds = new HashSet<int>();
         foreach (WorkerData worker in data.workers)

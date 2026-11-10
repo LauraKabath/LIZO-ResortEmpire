@@ -6,18 +6,39 @@ using System.Collections.Generic;
 // running WaveSimulation picks up changes immediately.
 public sealed class WorkerRoster
 {
+    public const int DefaultCapPercent = 80;
+
     private readonly ResortData data;
     private readonly Func<BuildingType, BuildingDefinition> getDefinition;
+    private readonly int capPercent;
 
     public IReadOnlyList<WorkerData> Workers => data.workers;
+    public int WorkerCap
+    {
+        get
+        {
+            int slots = 0;
+            foreach (BuildingData building in data.buildings)
+            {
+                if (building.owned)
+                    slots += getDefinition(building.type).GetWorkerSlots(building.level);
+            }
+            return CalculateCap(slots, capPercent);
+        }
+    }
 
     public event Action Changed;
 
-    public WorkerRoster(ResortData data, Func<BuildingType, BuildingDefinition> getDefinition)
+    public WorkerRoster(ResortData data, Func<BuildingType, BuildingDefinition> getDefinition,
+        int capPercent = DefaultCapPercent)
     {
         this.data = data ?? throw new ArgumentNullException(nameof(data));
         this.getDefinition = getDefinition ?? throw new ArgumentNullException(nameof(getDefinition));
+        this.capPercent = capPercent;
     }
+
+    internal static int CalculateCap(int slots, int percent) =>
+        slots * Math.Clamp(percent, 0, 99) / 100;
 
     public List<WorkerData> GetAvailableWorkers() => data.workers.FindAll(worker => !worker.isAssigned);
 
