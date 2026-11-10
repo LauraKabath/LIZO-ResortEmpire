@@ -20,7 +20,10 @@ MonoBehaviour:
   levels:
   - capacity: 3
     workerSlots: 1
+    costCoins: 1200
   - capacity: 5
     workerSlots: 1
+    costCoins: 500
   - capacity: 7
     workerSlots: 1
+    costCoins: 1200
