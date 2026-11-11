@@ -6,6 +6,14 @@ public sealed class ResortSession
     public ResortData Data { get; }
     public ResortPhase Phase => Data.phase;
     public bool CanStartWave => Phase == ResortPhase.AWAITING_WAVE;
+    public bool CanManageWorkers =>
+        Phase == ResortPhase.AWAITING_WAVE ||
+        Phase == ResortPhase.WAVE_ACTIVE ||
+        Phase == ResortPhase.UPGRADE;
+
+    public bool CanUpgradeBuildings =>
+        Phase == ResortPhase.AWAITING_WAVE ||
+        Phase == ResortPhase.UPGRADE;
 
     public event Action<ResortPhase> PhaseChanged;
 

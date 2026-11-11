@@ -46,6 +46,9 @@ public sealed class GameController : MonoBehaviour
     public ResortPhase Phase => session?.Phase ?? ResortPhase.AWAITING_WAVE;
     public bool CanStartWave => IsInitialized && session.CanStartWave &&
         waveCatalog.GetWave(Data.nextWaveNumber) != null;
+    public bool CanManageWorkers => IsInitialized && session.CanManageWorkers;
+
+    public bool CanUpgradeBuildings => IsInitialized && session.CanUpgradeBuildings;
 
     public event Action<ResortPhase> PhaseChanged;
 
