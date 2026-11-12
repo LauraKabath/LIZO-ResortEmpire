@@ -15,6 +15,7 @@ MonoBehaviour:
   type: 4
   displayName: Bungalows
   servicedNeed: 4
+  requiredCompletedWave: 6
   serviceTimeSeconds: 12
   utilizationWithoutWorker: 0.33
   levels:
