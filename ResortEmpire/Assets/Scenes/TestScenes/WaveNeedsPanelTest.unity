@@ -4047,6 +4047,7 @@ MonoBehaviour:
   startingResortValue: 0
   logPhaseChanges: 1
   logGeneratedNeeds: 1
+  logServiceLoad: 1
   resortData:
     saveVersion: 1
     phase: 1
@@ -4067,6 +4068,7 @@ MonoBehaviour:
     arrivalsClosed: 0
     isComplete: 0
     needs: []
+  startWaveButton: {fileID: 0}
 --- !u!1 &2147000200
 GameObject:
   m_ObjectHideFlags: 0
@@ -4117,6 +4119,7 @@ MonoBehaviour:
   canvasRect: {fileID: 140919435}
   popupView: {fileID: 12932464}
   buildingOffset: 12
+  avoidedUI: []
 --- !u!114 &2147000210
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -34606,6 +34609,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2569360563071315636, guid: 09e17297080b2424d8a1676500fbf6ef, type: 3}
       propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4805794878169085241, guid: 09e17297080b2424d8a1676500fbf6ef, type: 3}
+      propertyPath: normalColor.b
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4805794878169085241, guid: 09e17297080b2424d8a1676500fbf6ef, type: 3}
+      propertyPath: normalColor.g
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4805794878169085241, guid: 09e17297080b2424d8a1676500fbf6ef, type: 3}
+      propertyPath: normalColor.r
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4805794878169085241, guid: 09e17297080b2424d8a1676500fbf6ef, type: 3}

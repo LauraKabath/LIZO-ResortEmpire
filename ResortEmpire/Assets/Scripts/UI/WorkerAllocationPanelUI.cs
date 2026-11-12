@@ -23,6 +23,7 @@ public sealed class WorkerAllocationPanelUI : MonoBehaviour
     private WorkerRoster roster;
     private BuildingType selectedBuilding;
     private bool hasSelection;
+    public void Open(BuildingType type) => OnBuildingSelected(type);
 
     private void Awake()
     {
