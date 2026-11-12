@@ -2291,6 +2291,7 @@ MonoBehaviour:
   worldCamera: {fileID: 888047622}
   canvasRect: {fileID: 1098565359}
   popupView: {fileID: 1700321966}
+  purchasePopup: {fileID: 0}
   buildingOffset: 12
   avoidedUI:
   - {fileID: 1625592344}
