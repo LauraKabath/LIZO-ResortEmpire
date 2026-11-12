@@ -14,24 +14,25 @@ public sealed class WorkerRoster
     private readonly Func<bool> canChangeWorkers;
 
     public IReadOnlyList<WorkerData> Workers => data.workers;
-    public int WorkerCap
+    public int WorkerCap => GetCapWithAdditionalSlots(0);
+
+    internal int GetCapWithAdditionalSlots(int additionalSlots)
     {
-        get
+        int slots = additionalSlots;
+        foreach (BuildingData building in data.buildings)
         {
-            int slots = 0;
-            foreach (BuildingData building in data.buildings)
-            {
-                if (building.owned)
-                    slots += getDefinition(building.type).GetWorkerSlots(building.level);
-            }
-            return CalculateCap(slots, capPercent);
+            if (building.owned)
+                slots += getDefinition(building.type).GetWorkerSlots(building.level);
         }
+        return CalculateCap(slots, capPercent);
     }
 
     // The game phase decides when Workers may change (ResortSession.CanManageWorkers).
     public bool CanChangeWorkers => canChangeWorkers == null || canChangeWorkers();
 
     public event Action Changed;
+
+    internal void NotifyChanged() => Changed?.Invoke();
 
     public WorkerRoster(ResortData data, Func<BuildingType, BuildingDefinition> getDefinition,
         int capPercent = DefaultCapPercent, Func<bool> canChangeWorkers = null)
@@ -65,14 +66,14 @@ public sealed class WorkerRoster
     public bool TryAssign(int workerId, BuildingType target, out string error)
     {
         if (!CheckPhase(out error) || !WorkerAllocation.TryAssign(data, workerId, target, out error)) return false;
-        Changed?.Invoke();
+        NotifyChanged();
         return true;
     }
 
     public bool TryUnassign(int workerId, out string error)
     {
         if (!CheckPhase(out error) || !WorkerAllocation.TryUnassign(data, workerId, out error)) return false;
-        Changed?.Invoke();
+        NotifyChanged();
         return true;
     }
 

@@ -15,6 +15,8 @@ public sealed class BuildingAndWorkerStructureSmokeTest : MonoBehaviour
         Run("Building levels and Coin prices", CheckBuildings);
         Run("Editable Worker cap on new games", CheckStartingRoster);
         Run("Worker cap across owned buildings and levels", CheckOwnedSlots);
+        Run("Purchase gates, prices and bundled Workers", CheckBuildingPurchases);
+        Run("Purchase respects the projected Worker cap", CheckPurchaseWorkerCap);
         Run("Wave catalog and reward configuration", CheckWaveRewards);
 
         Debug.Log($"[Building and Worker Structure] {passed} PASSED, {failed} FAILED", this);
@@ -113,6 +115,81 @@ public sealed class BuildingAndWorkerStructureSmokeTest : MonoBehaviour
         try { catalog.Validate(); }
         catch (ArgumentException) { return; }
         throw new InvalidOperationException("A reward table with fewer than five Energy entries must be rejected.");
+    }
+
+    private static void CheckBuildingPurchases()
+    {
+        var buildings = LoadBuildings();
+        BuildingDefinition poolDefinition = buildings[BuildingType.Pool];
+        BuildingDefinition bungalowsDefinition = buildings[BuildingType.Bungalows];
+        int poolPrice = poolDefinition.GetCostCoins(1);
+        int bungalowsPrice = bungalowsDefinition.GetCostCoins(1);
+        var data = ResortData.CreatePrototypeStart(poolPrice + bungalowsPrice, 5, 0);
+        var session = new ResortSession(data);
+        var roster = new WorkerRoster(data, type => buildings[type]);
+        BuildingData pool = data.GetBuilding(BuildingType.Pool);
+        BuildingData bungalows = data.GetBuilding(BuildingType.Bungalows);
+        int rosterChanges = 0;
+        roster.Changed += () => rosterChanges++;
+
+        Expect(!session.TryPurchaseBuilding(poolDefinition, roster, out _), "A locked Pool must reject purchase.");
+        pool.availableToPurchase = true;
+        foreach (ResortPhase phase in Enum.GetValues(typeof(ResortPhase)))
+        {
+            if (phase == ResortPhase.AWAITING_WAVE || phase == ResortPhase.UPGRADE) continue;
+            data.phase = phase;
+            Expect(!session.TryPurchaseBuilding(poolDefinition, roster, out _), $"Purchase must be blocked during {phase}.");
+        }
+        Expect(data.coins == poolPrice + bungalowsPrice && !pool.owned && pool.availableToPurchase &&
+            pool.assignedWorkerId == -1 && roster.Workers.Count == 2 && rosterChanges == 0,
+            "Rejected purchases must preserve the wallet, plot, and roster.");
+
+        data.phase = ResortPhase.AWAITING_WAVE;
+        Expect(session.TryPurchaseBuilding(poolDefinition, roster, out string poolError), poolError);
+        Expect(data.coins == bungalowsPrice && roster.Workers.Count == 3 && rosterChanges == 1,
+            "Purchasing the Pool should charge its price and add one Worker.");
+        CheckPurchasedBuilding(data, pool);
+        Expect(!session.TryPurchaseBuilding(poolDefinition, roster, out _) &&
+            data.coins == bungalowsPrice && roster.Workers.Count == 3 && rosterChanges == 1,
+            "The same building cannot be bought twice.");
+
+        data.phase = ResortPhase.UPGRADE;
+        bungalows.availableToPurchase = true;
+        data.coins = bungalowsPrice - 1;
+        Expect(!session.TryPurchaseBuilding(bungalowsDefinition, roster, out _) && data.coins == bungalowsPrice - 1 &&
+            !bungalows.owned && bungalows.availableToPurchase && roster.Workers.Count == 3 && rosterChanges == 1,
+            "An insufficient balance must leave the purchase state intact.");
+        data.coins = bungalowsPrice;
+        Expect(session.TryPurchaseBuilding(bungalowsDefinition, roster, out string bungalowsError), bungalowsError);
+        Expect(data.coins == 0 && roster.Workers.Count == 4 && rosterChanges == 2,
+            "An exact balance should buy the Bungalows and add one Worker.");
+        CheckPurchasedBuilding(data, bungalows);
+    }
+
+    private static void CheckPurchaseWorkerCap()
+    {
+        var buildings = LoadBuildings();
+        var data = ResortData.CreatePrototypeStart(10000, 5, 0, 50);
+        var session = new ResortSession(data);
+        var roster = new WorkerRoster(data, type => buildings[type], 50);
+        data.GetBuilding(BuildingType.Pool).availableToPurchase = true;
+        BuildingData bungalows = data.GetBuilding(BuildingType.Bungalows);
+        bungalows.availableToPurchase = true;
+
+        Expect(session.TryPurchaseBuilding(buildings[BuildingType.Pool], roster, out string poolError), poolError);
+        int remainingCoins = data.coins;
+        Expect(!session.TryPurchaseBuilding(buildings[BuildingType.Bungalows], roster, out _) &&
+            data.coins == remainingCoins && !bungalows.owned && bungalows.availableToPurchase &&
+            roster.Workers.Count == 2 && roster.WorkerCap == 2,
+            "Five slots at 50% allow two Workers, so a third bundled Worker must block the purchase.");
+    }
+
+    private static void CheckPurchasedBuilding(ResortData data, BuildingData building)
+    {
+        WorkerData worker = data.GetWorker(building.assignedWorkerId);
+        Expect(building.owned && !building.availableToPurchase && building.level == 1 &&
+            worker != null && worker.isAssigned && worker.assignedBuilding == building.type,
+            "A purchased building must be owned at level 1 with its new Worker assigned.");
     }
 
     private static void Expect(bool condition, string message)

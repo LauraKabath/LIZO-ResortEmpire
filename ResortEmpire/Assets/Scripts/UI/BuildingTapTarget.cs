@@ -29,6 +29,7 @@ public sealed class BuildingTapTarget : MonoBehaviour, ITapTarget
 
     public void OnTapped()
     {
-        if (detailsUI != null) detailsUI.ShowBuilding(this);
+        if (isActiveAndEnabled && (buildingRenderer == null || buildingRenderer.enabled) && detailsUI != null)
+            detailsUI.ShowBuilding(this);
     }
 }
