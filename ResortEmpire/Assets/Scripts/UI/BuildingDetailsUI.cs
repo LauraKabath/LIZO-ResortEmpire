@@ -13,6 +13,7 @@ public sealed class BuildingDetailsUI : MonoBehaviour
     [Tooltip("The popup's parent. It stays inside this area, so use the Safe Area when the scene has one.")]
     [SerializeField] private RectTransform canvasRect;
     [SerializeField] private BuildingPopupView popupView;
+    [SerializeField] private BuildingPurchasePopup purchasePopup;
     [SerializeField, Min(0)] private float buildingOffset = 12;
     [Tooltip("UI the popup must not cover. Inactive objects are ignored.")]
     [SerializeField] private RectTransform[] avoidedUI = new RectTransform[0];
@@ -48,6 +49,8 @@ public sealed class BuildingDetailsUI : MonoBehaviour
 
     private void OnEnable()
     {
+        if (purchasePopup != null && gameController != null)
+            gameController.PhaseChanged += HidePurchasePopup;
         if (tapInputRouter == null) return;
         tapInputRouter.WorldTapped += DismissOutside;
         tapInputRouter.UiPressed += DismissOutside;
@@ -55,6 +58,8 @@ public sealed class BuildingDetailsUI : MonoBehaviour
 
     private void OnDisable()
     {
+        if (purchasePopup != null && gameController != null)
+            gameController.PhaseChanged -= HidePurchasePopup;
         if (tapInputRouter != null)
         {
             tapInputRouter.WorldTapped -= DismissOutside;
@@ -75,13 +80,18 @@ public sealed class BuildingDetailsUI : MonoBehaviour
             !gameController.IsInitialized || worldCamera == null) return;
         BuildingData state = gameController.Data.GetBuilding(building.Type);
         if (state == null) return;
-        // Locked plots stay selectable for future unlocking, but offer no guest service to show.
         if (!state.owned)
         {
             Hide();
+            if (purchasePopup != null)
+            {
+                if (!state.availableToPurchase) return;
+                purchasePopup.Show(gameController.GetBuildingDefinition(building.Type), gameController);
+            }
             BuildingSelected?.Invoke(building.Type);
             return;
         }
+        if (purchasePopup != null) purchasePopup.Hide();
         if (selected != building)
         {
             selected = building;
@@ -97,10 +107,17 @@ public sealed class BuildingDetailsUI : MonoBehaviour
         selected = null;
         ClearBindings();
         if (popupView != null) popupView.gameObject.SetActive(false);
+        if (purchasePopup != null) purchasePopup.Hide();
     }
+
+    private void HidePurchasePopup(ResortPhase phase) => purchasePopup.Hide();
 
     private void DismissOutside(Vector2 screenPosition)
     {
+        if (purchasePopup != null && purchasePopup.gameObject.activeSelf &&
+            !RectTransformUtility.RectangleContainsScreenPoint(purchasePopup.PopupRect, screenPosition, null))
+            purchasePopup.Hide();
+
         // A popup hidden by panning still has a rect, but must not swallow the tap that closes it.
         if (selected != null && (!popupView.gameObject.activeSelf ||
             !RectTransformUtility.RectangleContainsScreenPoint(

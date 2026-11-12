@@ -52,6 +52,8 @@ public sealed class GameController : MonoBehaviour
 
     public bool CanUpgradeBuildings => IsInitialized && session.CanUpgradeBuildings;
 
+    internal IReadOnlyList<WaveDefinition> WaveDefinitions => waveCatalog?.waves;
+
     public event Action<ResortPhase> PhaseChanged;
 
     private void Start()
@@ -95,6 +97,7 @@ public sealed class GameController : MonoBehaviour
         // Keep the completed result even if a phase listener immediately prepares the next wave.
         WaveData completedWave = activeWaveData;
         session.TryResolveWave();
+        UpdateBuildingPurchaseAvailability(completedWave.waveNumber);
         // Satisfaction and rewards will be added to resolving later.
         session.TryCompleteWave();
         Debug.Log($"Wave {completedWave.waveNumber} complete after {completedWave.elapsedSeconds:F2}s: all generated needs served.", this);
@@ -103,6 +106,22 @@ public sealed class GameController : MonoBehaviour
     public BuildingDefinition GetBuildingDefinition(BuildingType type) => definitions[type];
     public WaveDefinition GetWaveDefinition(int waveNumber) => waveCatalog?.GetWave(waveNumber);
     public WaveRewardSettings RewardSettings => waveCatalog?.rewards;
+
+    public string GetBuildingPurchaseBlockReason(BuildingType type) =>
+        IsInitialized && definitions.TryGetValue(type, out BuildingDefinition definition)
+            ? session.GetPurchaseBlockReason(definition, Workers)
+            : "This building is unavailable.";
+
+    public bool TryPurchaseBuilding(BuildingType type, out string error)
+    {
+        if (!EnsureReady() || !definitions.TryGetValue(type, out BuildingDefinition definition))
+        {
+            error = "This building is unavailable.";
+            return false;
+        }
+
+        return session.TryPurchaseBuilding(definition, Workers, out error);
+    }
 
     // Void entry points can also be connected directly to UI Button OnClick events.
     [ContextMenu("Wave/Start Wave")]
@@ -133,7 +152,7 @@ public sealed class GameController : MonoBehaviour
                 if (!building.owned)
                 {
                     if (wave.GetDemand(definition.ServicedNeed) > 0)
-                        Debug.Log($"Wave {wave.waveNumber}: {definition.ServicedNeed} stays locked because {building.type} is not owned.", this);
+                        Debug.Log($"Wave {wave.waveNumber}: {building.type} must be purchased before it can serve {definition.ServicedNeed}.", this);
                     continue;
                 }
                 services.Add(new WaveBuildingService(building, definition.ServicedNeed,
@@ -192,11 +211,36 @@ public sealed class GameController : MonoBehaviour
 
         // Prototype shortcut; reward collection and upgrade UI can use these phases later.
         session.TryEnterUpgrade();
+        ClearActiveWave();
+        session.TryPrepareNextWave();
+    }
+
+    internal bool TrySelectWaveForTesting(int waveNumber)
+    {
+        if (!EnsureReady() || GetWaveDefinition(waveNumber) == null) return false;
+
+        ClearActiveWave();
+        UpdateBuildingPurchaseAvailability(waveNumber - 1);
+        session.PrepareWaveForTesting(waveNumber);
+        return true;
+    }
+
+    private void UpdateBuildingPurchaseAvailability(int completedWaveNumber)
+    {
+        foreach (BuildingData building in Data.buildings)
+        {
+            int requiredWave = GetBuildingDefinition(building.type).RequiredCompletedWave;
+            if (requiredWave > 0)
+                building.availableToPurchase = !building.owned && completedWaveNumber >= requiredWave;
+        }
+    }
+
+    private void ClearActiveWave()
+    {
         DetachWaveSimulation();
         waveSimulation = null;
         activeWaveData = null;
         ServiceLoad = null;
-        session.TryPrepareNextWave();
     }
 
     private void LoadBuildingDefinitions()

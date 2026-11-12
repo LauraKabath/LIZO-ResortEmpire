@@ -15,6 +15,7 @@ MonoBehaviour:
   type: 3
   displayName: Pool
   servicedNeed: 3
+  requiredCompletedWave: 3
   serviceTimeSeconds: 12
   utilizationWithoutWorker: 0.33
   levels:
