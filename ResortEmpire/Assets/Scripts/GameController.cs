@@ -26,6 +26,7 @@ public sealed class GameController : MonoBehaviour
     [Header("Debugging")]
     [SerializeField] private bool logPhaseChanges = true;
     [SerializeField] private bool logGeneratedNeeds = true;
+    [SerializeField] private bool logServiceLoad = true;
 
     [Header("Runtime data (created on Play)")]
     [SerializeField] private ResortData resortData;
@@ -43,6 +44,7 @@ public sealed class GameController : MonoBehaviour
     public ResortData Data => resortData;
     public WaveData ActiveWave => activeWaveData;
     public WorkerRoster Workers { get; private set; }
+    public ServiceLoadMonitor ServiceLoad { get; private set; }
     public ResortPhase Phase => session?.Phase ?? ResortPhase.AWAITING_WAVE;
     public bool CanStartWave => IsInitialized && session.CanStartWave &&
         waveCatalog.GetWave(Data.nextWaveNumber) != null;
@@ -69,7 +71,8 @@ public sealed class GameController : MonoBehaviour
                 throw new InvalidOperationException("The wave definitions file is empty or invalid.");
             waveCatalog.Validate();
             Workers = new WorkerRoster(resortData, GetBuildingDefinition,
-                initialSettings != null ? initialSettings.WorkerCapPercent : WorkerRoster.DefaultCapPercent);
+                initialSettings != null ? initialSettings.WorkerCapPercent : WorkerRoster.DefaultCapPercent,
+                () => CanManageWorkers);
             session = new ResortSession(resortData);
             session.PhaseChanged += HandlePhaseChanged;
             HandlePhaseChanged(session.Phase);
@@ -86,6 +89,7 @@ public sealed class GameController : MonoBehaviour
         // Pausing stops both arrivals and service without changing Unity's global time scale.
         if (Phase != ResortPhase.WAVE_ACTIVE || waveSimulation == null) return;
         waveSimulation.Tick(Time.deltaTime);
+        ServiceLoad.Update();
         if (!activeWaveData.isComplete) return;
 
         // Keep the completed result even if a phase listener immediately prepares the next wave.
@@ -149,6 +153,8 @@ public sealed class GameController : MonoBehaviour
         activeWaveData = nextSimulation.Data;
         waveSimulation.NeedGenerated += HandleNeedGenerated;
         waveSimulation.ArrivalsClosed += HandleArrivalsClosed;
+        ServiceLoad = new ServiceLoadMonitor(activeWaveData, Data);
+        ServiceLoad.StateChanged += HandleServiceLoadChanged;
         session.TryStartWave();
         // There is no incoming presentation yet, so enter the active phase immediately.
         session.TryBeginWave();
@@ -189,6 +195,7 @@ public sealed class GameController : MonoBehaviour
         DetachWaveSimulation();
         waveSimulation = null;
         activeWaveData = null;
+        ServiceLoad = null;
         session.TryPrepareNextWave();
     }
 
@@ -236,6 +243,13 @@ public sealed class GameController : MonoBehaviour
         Debug.Log($"Wave {activeWaveData.waveNumber}: arrivals closed at {activeWaveData.arrivalDurationSeconds:F2}s; buildings continue serving until all slots and queues are empty.", this);
     }
 
+    private void HandleServiceLoadChanged(ServiceLoad load)
+    {
+        if (!logServiceLoad) return;
+        string cause = load.State == ServiceLoadState.BOTTLENECK ? $" ({load.Cause})" : string.Empty;
+        Debug.Log($"[Wave {activeWaveData.waveNumber} @ {activeWaveData.elapsedSeconds:F2}s] {load.Need} at {load.Building}: {load.State}{cause}, queue {load.QueueCount}.", this);
+    }
+
     private void HandlePhaseChanged(ResortPhase phase)
     {
         if (logPhaseChanges)
@@ -252,6 +266,7 @@ public sealed class GameController : MonoBehaviour
         if (waveSimulation == null) return;
         waveSimulation.NeedGenerated -= HandleNeedGenerated;
         waveSimulation.ArrivalsClosed -= HandleArrivalsClosed;
+        if (ServiceLoad != null) ServiceLoad.StateChanged -= HandleServiceLoadChanged;
     }
 
     private void OnDestroy()

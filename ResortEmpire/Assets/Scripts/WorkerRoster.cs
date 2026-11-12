@@ -11,6 +11,7 @@ public sealed class WorkerRoster
     private readonly ResortData data;
     private readonly Func<BuildingType, BuildingDefinition> getDefinition;
     private readonly int capPercent;
+    private readonly Func<bool> canChangeWorkers;
 
     public IReadOnlyList<WorkerData> Workers => data.workers;
     public int WorkerCap
@@ -27,14 +28,18 @@ public sealed class WorkerRoster
         }
     }
 
+    // The game phase decides when Workers may change (ResortSession.CanManageWorkers).
+    public bool CanChangeWorkers => canChangeWorkers == null || canChangeWorkers();
+
     public event Action Changed;
 
     public WorkerRoster(ResortData data, Func<BuildingType, BuildingDefinition> getDefinition,
-        int capPercent = DefaultCapPercent)
+        int capPercent = DefaultCapPercent, Func<bool> canChangeWorkers = null)
     {
         this.data = data ?? throw new ArgumentNullException(nameof(data));
         this.getDefinition = getDefinition ?? throw new ArgumentNullException(nameof(getDefinition));
         this.capPercent = capPercent;
+        this.canChangeWorkers = canChangeWorkers;
     }
 
     internal static int CalculateCap(int slots, int percent) =>
@@ -59,15 +64,21 @@ public sealed class WorkerRoster
 
     public bool TryAssign(int workerId, BuildingType target, out string error)
     {
-        if (!WorkerAllocation.TryAssign(data, workerId, target, out error)) return false;
+        if (!CheckPhase(out error) || !WorkerAllocation.TryAssign(data, workerId, target, out error)) return false;
         Changed?.Invoke();
         return true;
     }
 
     public bool TryUnassign(int workerId, out string error)
     {
-        if (!WorkerAllocation.TryUnassign(data, workerId, out error)) return false;
+        if (!CheckPhase(out error) || !WorkerAllocation.TryUnassign(data, workerId, out error)) return false;
         Changed?.Invoke();
         return true;
+    }
+
+    private bool CheckPhase(out string error)
+    {
+        error = CanChangeWorkers ? null : $"Workers cannot be changed during {data.phase}.";
+        return error == null;
     }
 }
