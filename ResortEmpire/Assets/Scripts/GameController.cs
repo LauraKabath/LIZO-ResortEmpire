@@ -33,6 +33,12 @@ public sealed class GameController : MonoBehaviour
     [SerializeField] private WaveData activeWaveData;
 
     [SerializeField] private Button startWaveButton;
+    
+    [Header("Wave evaluation")]
+    [SerializeField]
+    private WaveEvaluationSettings evaluationSettings = new WaveEvaluationSettings();
+
+    public WaveEvaluationResult LastWaveEvaluation { get; private set; }
 
     private readonly Dictionary<BuildingType, BuildingDefinition> definitions =
         new Dictionary<BuildingType, BuildingDefinition>();
@@ -98,7 +104,15 @@ public sealed class GameController : MonoBehaviour
         WaveData completedWave = activeWaveData;
         session.TryResolveWave();
         UpdateBuildingPurchaseAvailability(completedWave.waveNumber);
-        // Satisfaction and rewards will be added to resolving later.
+        // Satisfaction and rewards
+        LastWaveEvaluation = WaveEvaluator.Evaluate(completedWave, evaluationSettings);
+        Debug.Log(
+            $"Wave {completedWave.waveNumber} evaluation: " +
+            $"{LastWaveEvaluation.Stars}/5 stars, " +
+            $"satisfaction {LastWaveEvaluation.SatisfactionPercent:F1}%.\n" +
+            $"{LastWaveEvaluation.Success}\n" +
+            $"{LastWaveEvaluation.AreaToImprove}",
+            this);
         session.TryCompleteWave();
         Debug.Log($"Wave {completedWave.waveNumber} complete after {completedWave.elapsedSeconds:F2}s: all generated needs served.", this);
     }
