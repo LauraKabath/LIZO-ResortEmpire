@@ -13,6 +13,8 @@ public sealed class WaveNeedsPanel : MonoBehaviour
         public GameObject root;
         public TMP_Text valueText;
         public Button button; // tlačidlo Manage otvorí prideľovanie Workerov
+        [Tooltip("Riadok sa zobrazí až keď je budova pre túto potrebu kúpená.")]
+        public bool requiresUnlock;
     }
 
     [SerializeField] private GameObject panelRoot;
@@ -175,6 +177,20 @@ public sealed class WaveNeedsPanel : MonoBehaviour
         return need.ToString();
     }
 
+    // Potreba je odomknutá, ak je kúpená aspoň jedna budova, ktorá ju obsluhuje.
+    private bool IsNeedUnlocked(NeedType need)
+    {
+        if (game == null || game.Data == null) return false;
+
+        foreach (BuildingData building in game.Data.buildings)
+        {
+            if (!building.owned) continue;
+            if (game.GetBuildingDefinition(building.type).ServicedNeed == need)
+                return true;
+        }
+        return false;
+    }
+
     private void Refresh()
     {
         if (game == null) return;
@@ -193,6 +209,10 @@ public sealed class WaveNeedsPanel : MonoBehaviour
             foreach (Row row in rows)
             {
                 if (row.need != need.need) continue;
+
+                // Relax / OceanView sa ukážu až po odomknutí oblasti
+                if (row.requiresUnlock && !IsNeedUnlocked(need.need)) continue;
+
                 row.root.SetActive(true);
 
                 string text = $"{row.label} {need.filled}/{need.demandTotal}";
