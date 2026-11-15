@@ -19,6 +19,11 @@ public sealed class WaveCompletePanelUI : MonoBehaviour
     [SerializeField] private TMP_Text satisfactionText;
     [SerializeField] private TMP_Text successText;
     [SerializeField] private TMP_Text improvementText;
+    
+    [Header("Reward preview")]
+    [SerializeField] private TMP_Text coinsRewardText;
+    [SerializeField] private TMP_Text energyRewardText;
+    [SerializeField] private TMP_Text resortValueRewardText;
 
     private void Awake()
     {
@@ -66,6 +71,7 @@ public sealed class WaveCompletePanelUI : MonoBehaviour
 
         WaveEvaluationResult result = gameController.LastWaveEvaluation;
         WaveData wave = gameController.ActiveWave;
+        WaveRewardResult reward = gameController.LastWaveReward;
 
         if (titleText != null)
             titleText.text = $"WAVE {result.WaveNumber} COMPLETE!";
@@ -107,6 +113,13 @@ public sealed class WaveCompletePanelUI : MonoBehaviour
             successText.text = result.Success;
         if (improvementText != null)
             improvementText.text = result.AreaToImprove;
+        
+        if (coinsRewardText != null)
+            coinsRewardText.text = reward != null ? $"+{reward.Coins} Coins" : "Coins: unavailable";
+        if (energyRewardText != null)
+            energyRewardText.text = reward != null ? $"+{reward.Energy} Energy" : "Energy: unavailable";
+        if (resortValueRewardText != null)
+            resortValueRewardText.text = reward != null ? $"+{reward.ResortValue} Resort Value" : "Resort Value: unavailable";
 
         panelRoot.SetActive(true);
     }
