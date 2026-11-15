@@ -17,6 +17,7 @@ public sealed class BuildingDefinition : ScriptableObject
     [SerializeField] private string displayName;
     [SerializeField] private NeedType servicedNeed;
     [SerializeField, Min(0)] private int requiredCompletedWave;
+    [SerializeField] private Sprite constructionSiteSprite;
     [SerializeField, Min(0.01f)] private float serviceTimeSeconds = 12f;
     [SerializeField, Range(0.01f, 1f)] private float utilizationWithoutWorker = 0.33f;
     [SerializeField] private LevelConfig[] levels =
@@ -30,6 +31,7 @@ public sealed class BuildingDefinition : ScriptableObject
     public string DisplayName => displayName;
     public NeedType ServicedNeed => servicedNeed;
     public int RequiredCompletedWave => requiredCompletedWave;
+    public Sprite ConstructionSiteSprite => constructionSiteSprite;
     public float ServiceTimeSeconds => serviceTimeSeconds;
     public float UtilizationWithoutWorker => utilizationWithoutWorker;
     public int MaxLevel => levels == null ? 0 : levels.Length;

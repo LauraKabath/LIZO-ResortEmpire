@@ -5,6 +5,8 @@ using UnityEngine.UI;
 
 public sealed class WaveNeedsPanel : MonoBehaviour
 {
+    private const float ViewportPadding = 12f;
+
     [System.Serializable]
     public class Row
     {
@@ -13,6 +15,8 @@ public sealed class WaveNeedsPanel : MonoBehaviour
         public GameObject root;
         public TMP_Text valueText;
         public Button button; // tlačidlo Manage otvorí prideľovanie Workerov
+        [Tooltip("Riadok sa zobrazí až keď je budova pre túto potrebu kúpená.")]
+        public bool requiresUnlock;
     }
 
     [SerializeField] private GameObject panelRoot;
@@ -32,6 +36,8 @@ public sealed class WaveNeedsPanel : MonoBehaviour
     [SerializeField] private float alertSeconds = 4f;
 
     private GameController game;
+    private RectTransform layoutRect;
+    private Vector3 layoutScale;
     private ServiceLoadMonitor subscribedMonitor;
     private WorkerRoster subscribedRoster;
     private Coroutine alertRoutine;
@@ -39,6 +45,8 @@ public sealed class WaveNeedsPanel : MonoBehaviour
     private void Awake()
     {
         game = FindFirstObjectByType<GameController>();
+        layoutRect = transform as RectTransform;
+        layoutScale = transform.localScale;
 
         foreach (Row row in rows)
         {
@@ -72,8 +80,32 @@ public sealed class WaveNeedsPanel : MonoBehaviour
     {
         bool visible = phase == ResortPhase.WAVE_ACTIVE || phase == ResortPhase.WAVE_PAUSED;
         panelRoot.SetActive(visible);
-        if (visible) Refresh();
+        if (visible)
+        {
+            Refresh();
+            FitInsideViewport();
+        }
         else HideAlert();
+    }
+
+    private void OnRectTransformDimensionsChange() => FitInsideViewport();
+
+    private void FitInsideViewport()
+    {
+        if (layoutRect == null || layoutRect.parent is not RectTransform viewport) return;
+
+        Rect bounds = layoutRect.rect;
+        if (bounds.width <= 0f || bounds.height <= 0f) return;
+
+        // The panel's top-left pivot stays anchored so the selector above it keeps its space.
+        Vector3 origin = layoutRect.localPosition;
+        float availableWidth = viewport.rect.xMax - origin.x - ViewportPadding;
+        float availableHeight = origin.y - viewport.rect.yMin - ViewportPadding;
+        float scale = Mathf.Clamp01(Mathf.Min(
+            availableWidth / (bounds.width * layoutScale.x),
+            availableHeight / (bounds.height * layoutScale.y)));
+        Vector3 fittedScale = new Vector3(layoutScale.x * scale, layoutScale.y * scale, layoutScale.z);
+        if (layoutRect.localScale != fittedScale) layoutRect.localScale = fittedScale;
     }
 
     private void Update()
@@ -175,6 +207,20 @@ public sealed class WaveNeedsPanel : MonoBehaviour
         return need.ToString();
     }
 
+    // Potreba je odomknutá, ak je kúpená aspoň jedna budova, ktorá ju obsluhuje.
+    private bool IsNeedUnlocked(NeedType need)
+    {
+        if (game == null || game.Data == null) return false;
+
+        foreach (BuildingData building in game.Data.buildings)
+        {
+            if (!building.owned) continue;
+            if (game.GetBuildingDefinition(building.type).ServicedNeed == need)
+                return true;
+        }
+        return false;
+    }
+
     private void Refresh()
     {
         if (game == null) return;
@@ -193,6 +239,10 @@ public sealed class WaveNeedsPanel : MonoBehaviour
             foreach (Row row in rows)
             {
                 if (row.need != need.need) continue;
+
+                // Optional needs are shown only in waves that request them from an owned building.
+                if (row.requiresUnlock && (need.demandTotal == 0 || !IsNeedUnlocked(need.need))) continue;
+
                 row.root.SetActive(true);
 
                 string text = $"{row.label} {need.filled}/{need.demandTotal}";

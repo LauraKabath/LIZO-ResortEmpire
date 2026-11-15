@@ -16,6 +16,7 @@ MonoBehaviour:
   displayName: Bungalows
   servicedNeed: 4
   requiredCompletedWave: 6
+  constructionSiteSprite: {fileID: -2071997457785008541, guid: 4c4b2b87882a9a34ea6d10d9c863cf75, type: 3}
   serviceTimeSeconds: 12
   utilizationWithoutWorker: 0.33
   levels:

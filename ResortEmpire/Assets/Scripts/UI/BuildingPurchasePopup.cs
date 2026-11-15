@@ -1,15 +1,34 @@
+using System;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 [DisallowMultipleComponent]
 public sealed class BuildingPurchasePopup : MonoBehaviour
 {
-    [SerializeField] private Text title;
-    [SerializeField] private Text details;
-    [SerializeField] private Text feedback;
+    [Header("Texty")]
+    [SerializeField] private TMP_Text title;
+    [SerializeField] private TMP_Text needText;
+    [SerializeField] private TMP_Text guestSlotsText;
+    [SerializeField] private TMP_Text workerSlotsText;
+    [SerializeField] private TMP_Text requirementText;
+    [SerializeField] private TMP_Text priceText;
+    [SerializeField] private TMP_Text balanceText;
+    [SerializeField] private TMP_Text feedback;
+
+    [Header("Tlačidlá")]
     [SerializeField] private Button purchaseButton;
+    [SerializeField] private TMP_Text purchaseButtonLabel;
+    [SerializeField] private Button closeButton;
+
+    [Header("Farby")]
+    [SerializeField] private Color detailTextColor = Color.black;
+    [SerializeField] private Color normalPriceColor = new Color(0.25f, 0.17f, 0.08f);
+    [SerializeField] private Color notAffordableColor = new Color(0.75f, 0.15f, 0.15f);
 
     private GameController gameController;
+
+    public event Action<BuildingType> Purchased;
 
     public RectTransform PopupRect => (RectTransform)transform;
     public BuildingDefinition Definition { get; private set; }
@@ -18,62 +37,67 @@ public sealed class BuildingPurchasePopup : MonoBehaviour
     public int AvailableCoins => gameController.Data.coins;
     public bool CanAfford => AvailableCoins >= PriceCoins;
 
+    private void OnEnable()
+    {
+        if (purchaseButton != null) purchaseButton.onClick.AddListener(Purchase);
+        if (closeButton != null) closeButton.onClick.AddListener(Hide);
+    }
+
+    private void OnDisable()
+    {
+        if (purchaseButton != null) purchaseButton.onClick.RemoveListener(Purchase);
+        if (closeButton != null) closeButton.onClick.RemoveListener(Hide);
+    }
+
     public void Show(BuildingDefinition definition, GameController controller)
     {
         Definition = definition;
         gameController = controller;
-        if (feedback == null) feedback = transform.Find("Purchase feedback")?.GetComponent<Text>();
-        if (purchaseButton == null) RestorePurchaseButton();
-        title.text = definition.DisplayName;
-        Refresh(gameController.GetBuildingPurchaseBlockReason(definition.Type));
         gameObject.SetActive(true);
+        Refresh(gameController.GetBuildingPurchaseBlockReason(definition.Type));
     }
 
     public void Purchase()
     {
-        if (!isActiveAndEnabled || gameController == null) return;
+        if (gameController == null || Definition == null) return;
 
-        if (gameController.TryPurchaseBuilding(Definition.Type, out string error)) Hide();
+        if (gameController.TryPurchaseBuilding(Definition.Type, out string error))
+        {
+            Purchased?.Invoke(Definition.Type);
+            Hide();
+        }
         else Refresh(error);
     }
 
+    public void Hide() => gameObject.SetActive(false);
+
     private void Refresh(string blockReason)
     {
-        string need = Definition.ServicedNeed == NeedType.OceanView ? "Ocean View" : Definition.ServicedNeed.ToString();
-        string spacer = feedback == null && blockReason != null ? "\n" : "\n\n";
-        details.text = $"Level {Level}  ·  {need}\n" +
-            $"{Definition.GetCapacity(Level)} guest slots  ·  {Definition.GetWorkerSlots(Level)} Worker slot\n" +
-            $"Available after Wave {Definition.RequiredCompletedWave}{spacer}" +
-            $"Price   {PriceCoins:N0} Coins\n" +
-            $"Balance   {AvailableCoins:N0} Coins";
-        if (feedback != null) feedback.text = blockReason ?? string.Empty;
-        else if (blockReason != null) details.text += "\n" + blockReason;
-        purchaseButton.interactable = blockReason == null;
-    }
+        string need = Definition.ServicedNeed == NeedType.OceanView
+            ? "Ocean View" : Definition.ServicedNeed.ToString();
 
-    private void RestorePurchaseButton()
-    {
-        purchaseButton = transform.Find("Purchase")?.GetComponent<Button>();
-        if (purchaseButton == null)
+        SetDetail(title, Definition.DisplayName);
+        SetDetail(needText, $"Serves: {need}");
+        SetDetail(guestSlotsText, $"{Definition.GetCapacity(Level)} guest slots");
+        SetDetail(workerSlotsText, $"{Definition.GetWorkerSlots(Level)} Worker slot");
+        SetDetail(requirementText, $"Available after Wave {Definition.RequiredCompletedWave}");
+        SetDetail(balanceText, $"You have: {AvailableCoins:N0}");
+        SetDetail(feedback, blockReason ?? string.Empty);
+
+        if (priceText != null)
         {
-            var buttonObject = DefaultControls.CreateButton(default);
-            buttonObject.name = "Purchase";
-            var rect = (RectTransform)buttonObject.transform;
-            rect.SetParent(transform, false);
-            rect.anchorMin = rect.anchorMax = rect.pivot = Vector2.zero;
-            rect.anchoredPosition = new Vector2(30, 24);
-            rect.sizeDelta = new Vector2(140, 46);
-            buttonObject.layer = gameObject.layer;
-            Text label = buttonObject.GetComponentInChildren<Text>(true);
-            label.gameObject.layer = gameObject.layer;
-            label.text = "Purchase";
-            label.fontSize = 22;
-            label.raycastTarget = false;
-            purchaseButton = buttonObject.GetComponent<Button>();
+            priceText.text = $"{PriceCoins:N0}";
+            priceText.color = CanAfford ? normalPriceColor : notAffordableColor;
         }
-        if (purchaseButton.onClick.GetPersistentEventCount() == 0)
-            purchaseButton.onClick.AddListener(Purchase);
+
+        if (purchaseButton != null) purchaseButton.interactable = blockReason == null;
+        if (purchaseButtonLabel != null) purchaseButtonLabel.text = blockReason == null ? "Buy" : "Can't buy";
     }
 
-    public void Hide() => gameObject.SetActive(false);
+    private void SetDetail(TMP_Text text, string value)
+    {
+        if (text == null) return;
+        text.text = value;
+        text.color = detailTextColor;
+    }
 }

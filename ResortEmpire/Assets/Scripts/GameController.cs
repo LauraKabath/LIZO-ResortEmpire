@@ -87,7 +87,7 @@ public sealed class GameController : MonoBehaviour
         }
         catch (Exception exception)
         {
-            Debug.LogError($"Game initialization failed: {exception.Message}", this);
+            Debug.LogException(exception, this);
             enabled = false;
         }
     }
