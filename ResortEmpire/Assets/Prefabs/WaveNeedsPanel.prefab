@@ -3415,16 +3415,31 @@ MonoBehaviour:
     root: {fileID: 2337834404532392809}
     valueText: {fileID: 1548650258548367671}
     button: {fileID: 1281632261964584278}
+    requiresUnlock: 0
   - need: 2
     label: Drinks
     root: {fileID: 3137721941264795829}
     valueText: {fileID: 5013111695818666504}
     button: {fileID: 2562308591626179354}
+    requiresUnlock: 0
   - need: 1
     label: Food
     root: {fileID: 3333723896428196686}
     valueText: {fileID: 5892114967203333081}
     button: {fileID: 2327481105269759329}
+    requiresUnlock: 0
+  - need: 3
+    label: Relax
+    root: {fileID: 7328682449043154895}
+    valueText: {fileID: 7654480101756788001}
+    button: {fileID: 7193600790942418410}
+    requiresUnlock: 1
+  - need: 4
+    label: View
+    root: {fileID: 3887841706005234211}
+    valueText: {fileID: 5055932590759744825}
+    button: {fileID: 8459938969668461463}
+    requiresUnlock: 1
   normalColor: {r: 0, g: 0, b: 0, a: 1}
   bottleneckColor: {r: 1, g: 0, b: 0, a: 1}
   recoveringColor: {r: 1, g: 0.7, b: 0.2, a: 1}

@@ -7,18 +7,86 @@ public sealed class BuildingUnlockVisuals : MonoBehaviour
     [Serializable]
     private sealed class Plot
     {
-        public BuildingType type;
         [Tooltip("Zamknutá oblasť, kým sa budova nedá kúpiť.")]
         public GameObject lockedVisual;
-        [Tooltip("Stavenisko (pool0_0 / bungalow0_0), po kliknutí otvorí kúpu.")]
-        public GameObject constructionSite;
-        [Tooltip("Hotová budova (PoolLv1_0 / BungalowsLv1_0), po kúpe.")]
-        public GameObject builtBuilding;
+        public BuildingTapTarget tapTarget;
+
+        private SpriteRenderer spriteRenderer;
+        private PolygonCollider2D tapCollider;
+        private Sprite finishedSprite;
+        private Vector2[][] finishedColliderPaths;
+        private Vector2 finishedColliderOffset;
+
+        public void Initialize()
+        {
+            spriteRenderer = tapTarget.GetComponent<SpriteRenderer>();
+            tapCollider = tapTarget.GetComponent<PolygonCollider2D>();
+            finishedSprite = spriteRenderer.sprite;
+            finishedColliderPaths = new Vector2[tapCollider.pathCount][];
+            for (int i = 0; i < finishedColliderPaths.Length; i++)
+                finishedColliderPaths[i] = tapCollider.GetPath(i);
+            finishedColliderOffset = tapCollider.offset;
+        }
+
+        public void Show(BuildingData building, Sprite constructionSprite)
+        {
+            bool locked = !building.owned && !building.availableToPurchase;
+            if (lockedVisual != null) lockedVisual.SetActive(locked);
+
+            if (!locked)
+            {
+                bool showConstruction = !building.owned && constructionSprite != null;
+                Sprite sprite = showConstruction ? constructionSprite : finishedSprite;
+                if (spriteRenderer.sprite != sprite)
+                {
+                    spriteRenderer.sprite = sprite;
+                    if (showConstruction) SetConstructionCollider(sprite);
+                    else RestoreFinishedCollider();
+                }
+            }
+
+            tapTarget.gameObject.SetActive(!locked);
+        }
+
+        private void SetConstructionCollider(Sprite sprite)
+        {
+            int shapeCount = sprite.GetPhysicsShapeCount();
+            tapCollider.offset = Vector2.zero;
+            tapCollider.pathCount = Mathf.Max(1, shapeCount);
+            if (shapeCount == 0)
+            {
+                Bounds bounds = sprite.bounds;
+                tapCollider.SetPath(0, new[]
+                {
+                    new Vector2(bounds.min.x, bounds.min.y),
+                    new Vector2(bounds.min.x, bounds.max.y),
+                    new Vector2(bounds.max.x, bounds.max.y),
+                    new Vector2(bounds.max.x, bounds.min.y)
+                });
+                return;
+            }
+
+            for (int i = 0; i < shapeCount; i++)
+                tapCollider.SetPath(i, sprite.GetPhysicsShape(i).ToArray());
+        }
+
+        private void RestoreFinishedCollider()
+        {
+            tapCollider.offset = finishedColliderOffset;
+            tapCollider.pathCount = finishedColliderPaths.Length;
+            for (int i = 0; i < finishedColliderPaths.Length; i++)
+                tapCollider.SetPath(i, finishedColliderPaths[i]);
+        }
     }
 
     [SerializeField] private GameController gameController;
     [SerializeField] private BuildingPurchasePopup purchasePopup;
     [SerializeField] private Plot[] plots;
+
+    private void Awake()
+    {
+        foreach (Plot plot in plots) plot.Initialize();
+    }
 
     private void OnEnable()
     {
@@ -34,13 +102,7 @@ public sealed class BuildingUnlockVisuals : MonoBehaviour
     }
 
     private void OnPhaseChanged(ResortPhase phase) => Refresh();
-    private void OnPurchased(BuildingType type) => StartCoroutine(RefreshNextFrame());
-
-private System.Collections.IEnumerator RefreshNextFrame()
-{
-    yield return null;   // počkaj, kým GameController zapíše owned = true
-    Refresh();
-}
+    private void OnPurchased(BuildingType type) => Refresh();
 
     private void Refresh()
     {
@@ -48,16 +110,11 @@ private System.Collections.IEnumerator RefreshNextFrame()
 
         foreach (Plot plot in plots)
         {
-            BuildingData building = gameController.Data.GetBuilding(plot.type);
+            BuildingType type = plot.tapTarget.Type;
+            BuildingData building = gameController.Data.GetBuilding(type);
             if (building == null) continue;
 
-            bool owned = building.owned;
-            bool site = !owned && building.availableToPurchase;
-            bool locked = !owned && !site;
-
-            if (plot.lockedVisual != null) plot.lockedVisual.SetActive(locked);
-            if (plot.constructionSite != null) plot.constructionSite.SetActive(site);
-            if (plot.builtBuilding != null) plot.builtBuilding.SetActive(owned);
+            plot.Show(building, gameController.GetBuildingDefinition(type).ConstructionSiteSprite);
         }
     }
 }

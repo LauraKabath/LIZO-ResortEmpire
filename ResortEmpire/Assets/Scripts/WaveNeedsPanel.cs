@@ -210,8 +210,8 @@ public sealed class WaveNeedsPanel : MonoBehaviour
             {
                 if (row.need != need.need) continue;
 
-                // Relax / OceanView sa ukážu až po odomknutí oblasti
-                if (row.requiresUnlock && !IsNeedUnlocked(need.need)) continue;
+                // Optional needs are shown only in waves that request them from an owned building.
+                if (row.requiresUnlock && (need.demandTotal == 0 || !IsNeedUnlocked(need.need))) continue;
 
                 row.root.SetActive(true);
 
