@@ -22,6 +22,7 @@ public sealed class BuildingPurchasePopup : MonoBehaviour
     [SerializeField] private Button closeButton;
 
     [Header("Farby")]
+    [SerializeField] private Color detailTextColor = Color.black;
     [SerializeField] private Color normalPriceColor = new Color(0.25f, 0.17f, 0.08f);
     [SerializeField] private Color notAffordableColor = new Color(0.75f, 0.15f, 0.15f);
 
@@ -75,22 +76,28 @@ public sealed class BuildingPurchasePopup : MonoBehaviour
         string need = Definition.ServicedNeed == NeedType.OceanView
             ? "Ocean View" : Definition.ServicedNeed.ToString();
 
-        Set(title, Definition.DisplayName);
-        Set(needText, $"Serves: {need}");
-        Set(guestSlotsText, $"{Definition.GetCapacity(Level)} guest slots");
-        Set(workerSlotsText, $"{Definition.GetWorkerSlots(Level)} Worker slot");
-        Set(requirementText, $"Available after Wave {Definition.RequiredCompletedWave}");
-        Set(priceText, $"{PriceCoins:N0}");
-        Set(balanceText, $"You have: {AvailableCoins:N0}");
-        Set(feedback, blockReason ?? string.Empty);
+        SetDetail(title, Definition.DisplayName);
+        SetDetail(needText, $"Serves: {need}");
+        SetDetail(guestSlotsText, $"{Definition.GetCapacity(Level)} guest slots");
+        SetDetail(workerSlotsText, $"{Definition.GetWorkerSlots(Level)} Worker slot");
+        SetDetail(requirementText, $"Available after Wave {Definition.RequiredCompletedWave}");
+        SetDetail(balanceText, $"You have: {AvailableCoins:N0}");
+        SetDetail(feedback, blockReason ?? string.Empty);
 
-        if (priceText != null) priceText.color = CanAfford ? normalPriceColor : notAffordableColor;
+        if (priceText != null)
+        {
+            priceText.text = $"{PriceCoins:N0}";
+            priceText.color = CanAfford ? normalPriceColor : notAffordableColor;
+        }
+
         if (purchaseButton != null) purchaseButton.interactable = blockReason == null;
         if (purchaseButtonLabel != null) purchaseButtonLabel.text = blockReason == null ? "Buy" : "Can't buy";
     }
 
-    private static void Set(TMP_Text text, string value)
+    private void SetDetail(TMP_Text text, string value)
     {
-        if (text != null) text.text = value;
+        if (text == null) return;
+        text.text = value;
+        text.color = detailTextColor;
     }
 }

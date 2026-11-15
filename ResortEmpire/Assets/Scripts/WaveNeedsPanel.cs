@@ -5,6 +5,8 @@ using UnityEngine.UI;
 
 public sealed class WaveNeedsPanel : MonoBehaviour
 {
+    private const float ViewportPadding = 12f;
+
     [System.Serializable]
     public class Row
     {
@@ -34,6 +36,8 @@ public sealed class WaveNeedsPanel : MonoBehaviour
     [SerializeField] private float alertSeconds = 4f;
 
     private GameController game;
+    private RectTransform layoutRect;
+    private Vector3 layoutScale;
     private ServiceLoadMonitor subscribedMonitor;
     private WorkerRoster subscribedRoster;
     private Coroutine alertRoutine;
@@ -41,6 +45,8 @@ public sealed class WaveNeedsPanel : MonoBehaviour
     private void Awake()
     {
         game = FindFirstObjectByType<GameController>();
+        layoutRect = transform as RectTransform;
+        layoutScale = transform.localScale;
 
         foreach (Row row in rows)
         {
@@ -74,8 +80,32 @@ public sealed class WaveNeedsPanel : MonoBehaviour
     {
         bool visible = phase == ResortPhase.WAVE_ACTIVE || phase == ResortPhase.WAVE_PAUSED;
         panelRoot.SetActive(visible);
-        if (visible) Refresh();
+        if (visible)
+        {
+            Refresh();
+            FitInsideViewport();
+        }
         else HideAlert();
+    }
+
+    private void OnRectTransformDimensionsChange() => FitInsideViewport();
+
+    private void FitInsideViewport()
+    {
+        if (layoutRect == null || layoutRect.parent is not RectTransform viewport) return;
+
+        Rect bounds = layoutRect.rect;
+        if (bounds.width <= 0f || bounds.height <= 0f) return;
+
+        // The panel's top-left pivot stays anchored so the selector above it keeps its space.
+        Vector3 origin = layoutRect.localPosition;
+        float availableWidth = viewport.rect.xMax - origin.x - ViewportPadding;
+        float availableHeight = origin.y - viewport.rect.yMin - ViewportPadding;
+        float scale = Mathf.Clamp01(Mathf.Min(
+            availableWidth / (bounds.width * layoutScale.x),
+            availableHeight / (bounds.height * layoutScale.y)));
+        Vector3 fittedScale = new Vector3(layoutScale.x * scale, layoutScale.y * scale, layoutScale.z);
+        if (layoutRect.localScale != fittedScale) layoutRect.localScale = fittedScale;
     }
 
     private void Update()
