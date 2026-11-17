@@ -77,6 +77,38 @@ public sealed class WorkerRoster
         return true;
     }
 
+    // Moves an assigned worker to another building as one operation.
+    // If the target rejects the worker, the worker is returned to the source building.
+    public bool TryMove(int workerId, BuildingType target, out string error)
+    {
+        if (!CheckPhase(out error)) return false;
+
+        WorkerData worker = data.GetWorker(workerId);
+        if (worker == null || !worker.isAssigned)
+        {
+            error = "Worker is not assigned to any building.";
+            return false;
+        }
+
+        BuildingType source = worker.assignedBuilding;
+        if (source == target)
+        {
+            error = "Source and target building are the same.";
+            return false;
+        }
+
+        if (!WorkerAllocation.TryUnassign(data, workerId, out error)) return false;
+
+        if (!WorkerAllocation.TryAssign(data, workerId, target, out error))
+        {
+            WorkerAllocation.TryAssign(data, workerId, source, out _); // rollback
+            return false;
+        }
+
+        NotifyChanged(); // a single notification, so the UI does not flicker
+        return true;
+    }
+
     private bool CheckPhase(out string error)
     {
         error = CanChangeWorkers ? null : $"Workers cannot be changed during {data.phase}.";
