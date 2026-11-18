@@ -43381,6 +43381,54 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1773876354}
     m_Modifications:
+    - target: {fileID: 3064235153943862151, guid: 816dc304f1bc42247b1bb7546d478a6d, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3064235153943862151, guid: 816dc304f1bc42247b1bb7546d478a6d, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3064235153943862151, guid: 816dc304f1bc42247b1bb7546d478a6d, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3064235153943862151, guid: 816dc304f1bc42247b1bb7546d478a6d, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3064235153943862151, guid: 816dc304f1bc42247b1bb7546d478a6d, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3064235153943862151, guid: 816dc304f1bc42247b1bb7546d478a6d, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4141186603937567660, guid: 816dc304f1bc42247b1bb7546d478a6d, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4141186603937567660, guid: 816dc304f1bc42247b1bb7546d478a6d, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4141186603937567660, guid: 816dc304f1bc42247b1bb7546d478a6d, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4141186603937567660, guid: 816dc304f1bc42247b1bb7546d478a6d, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4141186603937567660, guid: 816dc304f1bc42247b1bb7546d478a6d, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4141186603937567660, guid: 816dc304f1bc42247b1bb7546d478a6d, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4539230379541377526, guid: 816dc304f1bc42247b1bb7546d478a6d, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -43481,11 +43529,35 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 677912519}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 4377524580136235333, guid: 816dc304f1bc42247b1bb7546d478a6d, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 2598091162762223644, guid: 816dc304f1bc42247b1bb7546d478a6d, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2167066981665916021}
   m_SourcePrefab: {fileID: 100100000, guid: 816dc304f1bc42247b1bb7546d478a6d, type: 3}
+--- !u!1 &2167066981665916017 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2598091162762223644, guid: 816dc304f1bc42247b1bb7546d478a6d, type: 3}
+  m_PrefabInstance: {fileID: 2167066981665916015}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2167066981665916021
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2167066981665916017}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 20ed03b0f3cd16f42a28bd013158635b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RewardsPanel
+  coinsText: {fileID: 285829611}
+  energyText: {fileID: 989456931}
+  resortValueText: {fileID: 1677452591}
 --- !u!224 &6018057772167008902 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 2233266657434369106, guid: 1a58ea8ce3af8b547827a9cffa128011, type: 3}
