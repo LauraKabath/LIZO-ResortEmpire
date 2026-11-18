@@ -373,7 +373,6 @@ GameObject:
   - component: {fileID: 3064235153943862151}
   - component: {fileID: 7349818166316013261}
   - component: {fileID: 9126985484502103553}
-  - component: {fileID: 4377524580136235333}
   m_Layer: 5
   m_Name: RewardsPanel
   m_TagString: Untagged
@@ -445,21 +444,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &4377524580136235333
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2598091162762223644}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 20ed03b0f3cd16f42a28bd013158635b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::RewardsPanel
-  coinsText: {fileID: 7429767183830012157}
-  energyText: {fileID: 6502926061708613016}
-  resortValueText: {fileID: 4637045038410566224}
 --- !u!1 &3120551894442121253
 GameObject:
   m_ObjectHideFlags: 0
