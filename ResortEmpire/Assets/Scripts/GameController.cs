@@ -62,9 +62,13 @@ public sealed class GameController : MonoBehaviour
 
     public bool CanUpgradeBuildings => IsInitialized && session.CanUpgradeBuildings;
 
+    // True when no wave after the current one is configured in Waves.json.
+    public bool IsFinalWave => IsInitialized && waveCatalog.GetWave(Data.nextWaveNumber + 1) == null;
+
     internal IReadOnlyList<WaveDefinition> WaveDefinitions => waveCatalog?.waves;
 
     public event Action<ResortPhase> PhaseChanged;
+    public event Action FinalWaveRewardsClaimed;
 
     private void Start()
     {
@@ -259,10 +263,26 @@ public sealed class GameController : MonoBehaviour
             Debug.LogWarning(error, this);
             return;
         }
-        if (waveCatalog.GetWave(Data.nextWaveNumber + 1) != null)
-            NextWave();
+        if (IsFinalWave)
+            FinishFinalWave();
         else
-            Debug.Log("Rewards claimed. No further wave is configured.", this);
+            NextWave();
+    }
+
+    // Separate action for the last configured wave. Put the end-of-game flow here,
+    // or subscribe to FinalWaveRewardsClaimed (GameEndPanelUI does).
+    [ContextMenu("Wave/Finish Final Wave")]
+    public void FinishFinalWave()
+    {
+        if (!EnsureReady()) return;
+        if (Phase != ResortPhase.WAVE_COMPLETE || !rewardClaimed || !IsFinalWave)
+        {
+            Debug.LogWarning("Claim the rewards of the last configured wave before finishing.", this);
+            return;
+        }
+
+        Debug.Log($"Final wave {Data.nextWaveNumber} finished. No further wave is configured.", this);
+        FinalWaveRewardsClaimed?.Invoke();
     }
 
     [ContextMenu("Wave/Claim Rewards Only (Test)")]
