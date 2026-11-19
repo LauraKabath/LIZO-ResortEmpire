@@ -118,17 +118,6 @@ public class WaveForecastPanelUI : MonoBehaviour
 
         RefreshWaveData();
         return;
-
-        foreach (Row row in rows)
-        {
-            if (row.root == null)
-                continue;
-
-            bool visible = !row.requiresUnlock ||
-                           IsNeedUnlocked(row.need);
-
-            row.root.SetActive(visible);
-        }
     }
 
     // Shows the wave that Start Wave will launch next (Data.nextWaveNumber),
