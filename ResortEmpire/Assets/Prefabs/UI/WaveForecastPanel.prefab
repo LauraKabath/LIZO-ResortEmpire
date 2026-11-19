@@ -2344,6 +2344,7 @@ MonoBehaviour:
     root: {fileID: 1554926806627545542}
     valueText: {fileID: 1009356325215847114}
     requiresUnlock: 1
+  waveNumberText: {fileID: 2315411993605157424}
 --- !u!1 &6862221178858881802
 GameObject:
   m_ObjectHideFlags: 0
