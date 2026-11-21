@@ -18,7 +18,8 @@ public sealed class ResortData
     public List<WorkerData> workers = new List<WorkerData>();
 
     // Balancing values for coins/energy/value deliberately left to game initialization.
-    public static ResortData CreatePrototypeStart(int coins, int energy, int resortValue)
+    public static ResortData CreatePrototypeStart(int coins, int energy, int resortValue,
+        int workerCapPercent = WorkerRoster.DefaultCapPercent)
     {
         var resort = new ResortData
         {
@@ -32,11 +33,17 @@ public sealed class ResortData
         resort.buildings.Add(new BuildingData(BuildingType.Pool, false, false));
         resort.buildings.Add(new BuildingData(BuildingType.Bungalows, false, false));
 
-        // Initial allocation is a provisional UI/gameplay choice and can be changed freely.
-        resort.workers.Add(new WorkerData(1, BuildingType.Reception));
-        resort.workers.Add(new WorkerData(2, BuildingType.Restaurant));
-        resort.GetBuilding(BuildingType.Reception).assignedWorkerId = 1;
-        resort.GetBuilding(BuildingType.Restaurant).assignedWorkerId = 2;
+        // Starting buildings have one Lv1 slot each.
+        int startingSlots = resort.buildings.FindAll(building => building.owned).Count;
+        int workerCap = WorkerRoster.CalculateCap(startingSlots, workerCapPercent);
+        foreach (BuildingData building in resort.buildings)
+        {
+            if (resort.workers.Count == workerCap) break;
+            if (!building.owned) continue;
+            int workerId = resort.workers.Count + 1;
+            resort.workers.Add(new WorkerData(workerId, building.type));
+            building.assignedWorkerId = workerId;
+        }
         return resort;
     }
 

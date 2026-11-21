@@ -6,18 +6,45 @@ using System.Collections.Generic;
 // running WaveSimulation picks up changes immediately.
 public sealed class WorkerRoster
 {
+    public const int DefaultCapPercent = 80;
+
     private readonly ResortData data;
     private readonly Func<BuildingType, BuildingDefinition> getDefinition;
+    private readonly int capPercent;
+    private readonly Func<bool> canChangeWorkers;
 
     public IReadOnlyList<WorkerData> Workers => data.workers;
+    public int WorkerCap => GetCapWithAdditionalSlots(0);
+
+    internal int GetCapWithAdditionalSlots(int additionalSlots)
+    {
+        int slots = additionalSlots;
+        foreach (BuildingData building in data.buildings)
+        {
+            if (building.owned)
+                slots += getDefinition(building.type).GetWorkerSlots(building.level);
+        }
+        return CalculateCap(slots, capPercent);
+    }
+
+    // The game phase decides when Workers may change (ResortSession.CanManageWorkers).
+    public bool CanChangeWorkers => canChangeWorkers == null || canChangeWorkers();
 
     public event Action Changed;
 
-    public WorkerRoster(ResortData data, Func<BuildingType, BuildingDefinition> getDefinition)
+    internal void NotifyChanged() => Changed?.Invoke();
+
+    public WorkerRoster(ResortData data, Func<BuildingType, BuildingDefinition> getDefinition,
+        int capPercent = DefaultCapPercent, Func<bool> canChangeWorkers = null)
     {
         this.data = data ?? throw new ArgumentNullException(nameof(data));
         this.getDefinition = getDefinition ?? throw new ArgumentNullException(nameof(getDefinition));
+        this.capPercent = capPercent;
+        this.canChangeWorkers = canChangeWorkers;
     }
+
+    internal static int CalculateCap(int slots, int percent) =>
+        slots * Math.Clamp(percent, 0, 99) / 100;
 
     public List<WorkerData> GetAvailableWorkers() => data.workers.FindAll(worker => !worker.isAssigned);
 
@@ -38,15 +65,53 @@ public sealed class WorkerRoster
 
     public bool TryAssign(int workerId, BuildingType target, out string error)
     {
-        if (!WorkerAllocation.TryAssign(data, workerId, target, out error)) return false;
-        Changed?.Invoke();
+        if (!CheckPhase(out error) || !WorkerAllocation.TryAssign(data, workerId, target, out error)) return false;
+        NotifyChanged();
         return true;
     }
 
     public bool TryUnassign(int workerId, out string error)
     {
-        if (!WorkerAllocation.TryUnassign(data, workerId, out error)) return false;
-        Changed?.Invoke();
+        if (!CheckPhase(out error) || !WorkerAllocation.TryUnassign(data, workerId, out error)) return false;
+        NotifyChanged();
         return true;
+    }
+
+    // Moves an assigned worker to another building as one operation.
+    // If the target rejects the worker, the worker is returned to the source building.
+    public bool TryMove(int workerId, BuildingType target, out string error)
+    {
+        if (!CheckPhase(out error)) return false;
+
+        WorkerData worker = data.GetWorker(workerId);
+        if (worker == null || !worker.isAssigned)
+        {
+            error = "Worker is not assigned to any building.";
+            return false;
+        }
+
+        BuildingType source = worker.assignedBuilding;
+        if (source == target)
+        {
+            error = "Source and target building are the same.";
+            return false;
+        }
+
+        if (!WorkerAllocation.TryUnassign(data, workerId, out error)) return false;
+
+        if (!WorkerAllocation.TryAssign(data, workerId, target, out error))
+        {
+            WorkerAllocation.TryAssign(data, workerId, source, out _); // rollback
+            return false;
+        }
+
+        NotifyChanged(); // a single notification, so the UI does not flicker
+        return true;
+    }
+
+    private bool CheckPhase(out string error)
+    {
+        error = CanChangeWorkers ? null : $"Workers cannot be changed during {data.phase}.";
+        return error == null;
     }
 }

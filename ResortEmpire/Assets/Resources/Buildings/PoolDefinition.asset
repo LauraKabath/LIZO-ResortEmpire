@@ -15,12 +15,17 @@ MonoBehaviour:
   type: 3
   displayName: Pool
   servicedNeed: 3
+  requiredCompletedWave: 3
+  constructionSiteSprite: {fileID: -3513352836656513403, guid: 553ac2c785a96964290dede44ecfd3c5, type: 3}
   serviceTimeSeconds: 12
   utilizationWithoutWorker: 0.33
   levels:
   - capacity: 3
     workerSlots: 1
+    costCoins: 1200
   - capacity: 5
     workerSlots: 1
+    costCoins: 500
   - capacity: 7
     workerSlots: 1
+    costCoins: 1200

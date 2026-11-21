@@ -26,12 +26,23 @@ public sealed class GameController : MonoBehaviour
     [Header("Debugging")]
     [SerializeField] private bool logPhaseChanges = true;
     [SerializeField] private bool logGeneratedNeeds = true;
+    [SerializeField] private bool logServiceLoad = true;
 
     [Header("Runtime data (created on Play)")]
     [SerializeField] private ResortData resortData;
     [SerializeField] private WaveData activeWaveData;
 
     [SerializeField] private Button startWaveButton;
+    
+    [Header("Wave evaluation")]
+    [SerializeField]
+    private WaveEvaluationSettings evaluationSettings = new WaveEvaluationSettings();
+
+    public WaveEvaluationResult LastWaveEvaluation { get; private set; }
+    public WaveRewardResult LastWaveReward { get; private set; }
+    public bool HasUnclaimedRewards => Phase == ResortPhase.WAVE_COMPLETE &&
+                                       LastWaveReward != null && !rewardClaimed;
+    private bool rewardClaimed;
 
     private readonly Dictionary<BuildingType, BuildingDefinition> definitions =
         new Dictionary<BuildingType, BuildingDefinition>();
@@ -43,11 +54,21 @@ public sealed class GameController : MonoBehaviour
     public ResortData Data => resortData;
     public WaveData ActiveWave => activeWaveData;
     public WorkerRoster Workers { get; private set; }
+    public ServiceLoadMonitor ServiceLoad { get; private set; }
     public ResortPhase Phase => session?.Phase ?? ResortPhase.AWAITING_WAVE;
     public bool CanStartWave => IsInitialized && session.CanStartWave &&
         waveCatalog.GetWave(Data.nextWaveNumber) != null;
+    public bool CanManageWorkers => IsInitialized && session.CanManageWorkers;
+
+    public bool CanUpgradeBuildings => IsInitialized && session.CanUpgradeBuildings;
+
+    // True when no wave after the current one is configured in Waves.json.
+    public bool IsFinalWave => IsInitialized && waveCatalog.GetWave(Data.nextWaveNumber + 1) == null;
+
+    internal IReadOnlyList<WaveDefinition> WaveDefinitions => waveCatalog?.waves;
 
     public event Action<ResortPhase> PhaseChanged;
+    public event Action FinalWaveRewardsClaimed;
 
     private void Start()
     {
@@ -65,14 +86,18 @@ public sealed class GameController : MonoBehaviour
             if (waveCatalog == null)
                 throw new InvalidOperationException("The wave definitions file is empty or invalid.");
             waveCatalog.Validate();
-            Workers = new WorkerRoster(resortData, GetBuildingDefinition);
+            if (waveCatalog.rewards == null)
+                throw new InvalidOperationException("Configure reward settings in Waves.json.");
+            Workers = new WorkerRoster(resortData, GetBuildingDefinition,
+                initialSettings != null ? initialSettings.WorkerCapPercent : WorkerRoster.DefaultCapPercent,
+                () => CanManageWorkers);
             session = new ResortSession(resortData);
             session.PhaseChanged += HandlePhaseChanged;
             HandlePhaseChanged(session.Phase);
         }
         catch (Exception exception)
         {
-            Debug.LogError($"Game initialization failed: {exception.Message}", this);
+            Debug.LogException(exception, this);
             enabled = false;
         }
     }
@@ -82,18 +107,48 @@ public sealed class GameController : MonoBehaviour
         // Pausing stops both arrivals and service without changing Unity's global time scale.
         if (Phase != ResortPhase.WAVE_ACTIVE || waveSimulation == null) return;
         waveSimulation.Tick(Time.deltaTime);
+        ServiceLoad.Update();
         if (!activeWaveData.isComplete) return;
 
         // Keep the completed result even if a phase listener immediately prepares the next wave.
         WaveData completedWave = activeWaveData;
         session.TryResolveWave();
-        // Satisfaction and rewards will be added to resolving later.
+        UpdateBuildingPurchaseAvailability(completedWave.waveNumber);
+        // Satisfaction and rewards
+        // Evaluate completed wave
+        LastWaveEvaluation = WaveEvaluator.Evaluate(completedWave, evaluationSettings);
+        LastWaveReward = WaveRewardCalculator.Calculate(completedWave, LastWaveEvaluation, RewardSettings);
+        rewardClaimed = false;
+        Debug.Log(
+            $"Wave {completedWave.waveNumber} evaluation: " +
+            $"{LastWaveEvaluation.Stars}/5 stars, " +
+            $"satisfaction {LastWaveEvaluation.SatisfactionPercent:F1}%.\n" +
+            $"{LastWaveEvaluation.Success}\n" +
+            $"{LastWaveEvaluation.AreaToImprove}",
+            this);
         session.TryCompleteWave();
         Debug.Log($"Wave {completedWave.waveNumber} complete after {completedWave.elapsedSeconds:F2}s: all generated needs served.", this);
     }
 
     public BuildingDefinition GetBuildingDefinition(BuildingType type) => definitions[type];
     public WaveDefinition GetWaveDefinition(int waveNumber) => waveCatalog?.GetWave(waveNumber);
+    public WaveRewardSettings RewardSettings => waveCatalog?.rewards;
+
+    public string GetBuildingPurchaseBlockReason(BuildingType type) =>
+        IsInitialized && definitions.TryGetValue(type, out BuildingDefinition definition)
+            ? session.GetPurchaseBlockReason(definition, Workers)
+            : "This building is unavailable.";
+
+    public bool TryPurchaseBuilding(BuildingType type, out string error)
+    {
+        if (!EnsureReady() || !definitions.TryGetValue(type, out BuildingDefinition definition))
+        {
+            error = "This building is unavailable.";
+            return false;
+        }
+
+        return session.TryPurchaseBuilding(definition, Workers, out error);
+    }
 
     // Void entry points can also be connected directly to UI Button OnClick events.
     [ContextMenu("Wave/Start Wave")]
@@ -124,7 +179,7 @@ public sealed class GameController : MonoBehaviour
                 if (!building.owned)
                 {
                     if (wave.GetDemand(definition.ServicedNeed) > 0)
-                        Debug.Log($"Wave {wave.waveNumber}: {definition.ServicedNeed} stays locked because {building.type} is not owned.", this);
+                        Debug.Log($"Wave {wave.waveNumber}: {building.type} must be purchased before it can serve {definition.ServicedNeed}.", this);
                     continue;
                 }
                 services.Add(new WaveBuildingService(building, definition.ServicedNeed,
@@ -144,6 +199,8 @@ public sealed class GameController : MonoBehaviour
         activeWaveData = nextSimulation.Data;
         waveSimulation.NeedGenerated += HandleNeedGenerated;
         waveSimulation.ArrivalsClosed += HandleArrivalsClosed;
+        ServiceLoad = new ServiceLoadMonitor(activeWaveData, Data);
+        ServiceLoad.StateChanged += HandleServiceLoadChanged;
         session.TryStartWave();
         // There is no incoming presentation yet, so enter the active phase immediately.
         session.TryBeginWave();
@@ -163,6 +220,77 @@ public sealed class GameController : MonoBehaviour
         if (EnsureReady() && !session.TryResumeWave())
             Debug.LogWarning($"Cannot resume a wave during {Phase}.", this);
     }
+    
+    // Applies a previously calculated reward exactly once. Does not advance the wave.
+    public bool TryClaimRewards(out string error)
+    {
+        if (!EnsureReady() || !HasUnclaimedRewards)
+        {
+            error = "No unclaimed wave rewards are available.";
+            return false;
+        }
+
+        try
+        {
+            // Validate all additions before modifying any resource.
+            int newCoins = checked(Data.coins + LastWaveReward.Coins);
+            int newEnergy = checked(Data.energy + LastWaveReward.Energy);
+            int newValue = checked(Data.resortValue + LastWaveReward.ResortValue);
+            Data.coins = newCoins;
+            Data.energy = newEnergy;
+            Data.resortValue = newValue;
+        }
+        catch (OverflowException)
+        {
+            error = "Reward exceeds the resource limit.";
+            return false;
+        }
+
+        rewardClaimed = true;
+        error = null;
+        Debug.Log($"Claimed wave {LastWaveReward.WaveNumber} rewards: " +
+                  $"{LastWaveReward.Coins} Coins, {LastWaveReward.Energy} Energy, " +
+                  $"{LastWaveReward.ResortValue} Resort Value.", this);
+        return true;
+    }
+    
+    // Direct UI Button.OnClick entry point: claim first, then continue when a next wave exists.
+    [ContextMenu("Wave/Claim Rewards and Continue")]
+    public void ClaimRewardsAndContinue()
+    {
+        if (!TryClaimRewards(out string error))
+        {
+            Debug.LogWarning(error, this);
+            return;
+        }
+        if (IsFinalWave)
+            FinishFinalWave();
+        else
+            NextWave();
+    }
+
+    // Separate action for the last configured wave. Put the end-of-game flow here,
+    // or subscribe to FinalWaveRewardsClaimed (GameEndPanelUI does).
+    [ContextMenu("Wave/Finish Final Wave")]
+    public void FinishFinalWave()
+    {
+        if (!EnsureReady()) return;
+        if (Phase != ResortPhase.WAVE_COMPLETE || !rewardClaimed || !IsFinalWave)
+        {
+            Debug.LogWarning("Claim the rewards of the last configured wave before finishing.", this);
+            return;
+        }
+
+        Debug.Log($"Final wave {Data.nextWaveNumber} finished. No further wave is configured.", this);
+        FinalWaveRewardsClaimed?.Invoke();
+    }
+
+    [ContextMenu("Wave/Claim Rewards Only (Test)")]
+    public void ClaimRewardsForTesting()
+    {
+        if (!TryClaimRewards(out string error))
+            Debug.LogWarning(error, this);
+    }
 
     [ContextMenu("Wave/Next Wave")]
     public void NextWave()
@@ -173,6 +301,11 @@ public sealed class GameController : MonoBehaviour
             Debug.LogWarning("Finish the current wave before preparing the next one.", this);
             return;
         }
+        if (!rewardClaimed || LastWaveReward == null)
+        {
+            Debug.LogWarning("Claim the completed wave rewards before continuing.", this);
+            return;
+        }
         if (waveCatalog.GetWave(Data.nextWaveNumber + 1) == null)
         {
             Debug.LogWarning($"No definition configured for wave {Data.nextWaveNumber + 1}.", this);
@@ -181,10 +314,39 @@ public sealed class GameController : MonoBehaviour
 
         // Prototype shortcut; reward collection and upgrade UI can use these phases later.
         session.TryEnterUpgrade();
+        ClearActiveWave();
+        session.TryPrepareNextWave();
+    }
+
+    internal bool TrySelectWaveForTesting(int waveNumber)
+    {
+        if (!EnsureReady() || GetWaveDefinition(waveNumber) == null) return false;
+
+        ClearActiveWave();
+        LastWaveEvaluation = null;
+        LastWaveReward = null;
+        rewardClaimed = false;
+        UpdateBuildingPurchaseAvailability(waveNumber - 1);
+        session.PrepareWaveForTesting(waveNumber);
+        return true;
+    }
+
+    private void UpdateBuildingPurchaseAvailability(int completedWaveNumber)
+    {
+        foreach (BuildingData building in Data.buildings)
+        {
+            int requiredWave = GetBuildingDefinition(building.type).RequiredCompletedWave;
+            if (requiredWave > 0)
+                building.availableToPurchase = !building.owned && completedWaveNumber >= requiredWave;
+        }
+    }
+
+    private void ClearActiveWave()
+    {
         DetachWaveSimulation();
         waveSimulation = null;
         activeWaveData = null;
-        session.TryPrepareNextWave();
+        ServiceLoad = null;
     }
 
     private void LoadBuildingDefinitions()
@@ -231,6 +393,13 @@ public sealed class GameController : MonoBehaviour
         Debug.Log($"Wave {activeWaveData.waveNumber}: arrivals closed at {activeWaveData.arrivalDurationSeconds:F2}s; buildings continue serving until all slots and queues are empty.", this);
     }
 
+    private void HandleServiceLoadChanged(ServiceLoad load)
+    {
+        if (!logServiceLoad) return;
+        string cause = load.State == ServiceLoadState.BOTTLENECK ? $" ({load.Cause})" : string.Empty;
+        Debug.Log($"[Wave {activeWaveData.waveNumber} @ {activeWaveData.elapsedSeconds:F2}s] {load.Need} at {load.Building}: {load.State}{cause}, queue {load.QueueCount}.", this);
+    }
+
     private void HandlePhaseChanged(ResortPhase phase)
     {
         if (logPhaseChanges)
@@ -247,6 +416,7 @@ public sealed class GameController : MonoBehaviour
         if (waveSimulation == null) return;
         waveSimulation.NeedGenerated -= HandleNeedGenerated;
         waveSimulation.ArrivalsClosed -= HandleArrivalsClosed;
+        if (ServiceLoad != null) ServiceLoad.StateChanged -= HandleServiceLoadChanged;
     }
 
     private void OnDestroy()
