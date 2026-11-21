@@ -9,8 +9,8 @@ A 2D isometric mobile resort management game developed by **LIZO Project**.
 - **Game Engine:** Unity 6.3 LTS (6000.3.26f1)
 - **Target Platforms:** Android and iOS
 - **Orientation:** Landscape
-- **Development Status:** Sprint 2 Completed – Core Gameplay Integration
-- **Current Version:** v0.2.0
+- **Development Status:** Sprint 3 Completed – Extended Gameplay Loop
+- **Current Version:** v0.3.0
 
 ## Getting Started
 
@@ -20,7 +20,15 @@ A 2D isometric mobile resort management game developed by **LIZO Project**.
 4. Install or select Unity Editor version `6000.3.26f1`.
 5. Open the project in Unity.
 
-## Implemented Features (Sprint 2)
+## Sprint 1 – Project Setup
+
+- Initial Unity project and GitHub repository setup.
+- Isometric grid, island scene, and basic environment.
+- Initial building assets and locked areas.
+- Camera movement with boundaries.
+- Mobile landscape orientation and initial UI setup.
+
+## Sprint 2 – Core Gameplay Integration
 
 - New game initialization and main menu.
 - Splash screen with transition to the main menu.
@@ -33,13 +41,32 @@ A 2D isometric mobile resort management game developed by **LIZO Project**.
 - Start Wave button with automatic state updates.
 - Mobile landscape UI with SafeArea support.
 
-**Note:** Save/Load functionality is not yet implemented. The project is still under development.
+## Sprint 3 – Extended Gameplay Loop
+
+- Extended gameplay phase transitions and wave progression.
+- Configuration of five service buildings and at least eight guest waves.
+- Wave Forecast Panel displaying expected needs before starting a wave.
+- Collapsible forecast UI with visibility based on game phases.
+- Dynamic visibility of guest needs based on unlocked service buildings.
+- Purchase and unlocking of Pool and Bungalows using Coins.
+- Automatic Worker allocation and activation of new guest needs after building purchases.
+- Worker reassignment during active waves.
+- Reduced but non-zero service performance for buildings without assigned Workers.
+- Service bottleneck detection and recovery status indicators.
+- Wave completion rating from 1 to 5 stars.
+- Wave completion results and Coins rewards.
+- Reward claiming and continuation to subsequent waves.
+- Game End Panel after completing the configured wave sequence.
+
+**Note:** Save/Load functionality, building upgrades, and upgrade recommendations are planned for later development. The project is still under development.
 
 ## Testing
 
 Testing is performed continuously throughout development to verify individual features and their integration.
 
-During Sprint 2, the team performed:
+### Sprint 2
+
+The team performed:
 
 - Functional testing of guest wave management and state transitions.
 - Verification of aggregated guest needs processing.
@@ -50,7 +77,18 @@ During Sprint 2, the team performed:
 - Automated smoke tests for selected gameplay systems.
 - Integration testing in the main game scene.
 
-Identified issues were addressed during development and verified through additional testing.
+### Sprint 3
+
+During Sprint 3, the team performed:
+
+- Functional testing of wave progression, game phase transitions, and completion of the configured wave sequence.
+- Verification of Wave Forecast visibility, expected guest needs, and updates after building purchases.
+- Testing of Pool and Bungalows purchases, including unlock conditions, Coins deduction, and building state updates.
+- Verification of Worker reassignment, service performance, and bottleneck detection.
+- Testing of wave completion ratings and Coins reward calculation.
+- Verification of reward claiming, prevention of duplicate rewards, and continuation to subsequent waves.
+- Testing of Wave Complete and Game End Panel functionality.
+- Integration testing of the extended gameplay loop in the main game scene.
 
 The project has not yet undergone complete final MVP testing.
 
