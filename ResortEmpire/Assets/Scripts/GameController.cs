@@ -68,6 +68,7 @@ public sealed class GameController : MonoBehaviour
     internal IReadOnlyList<WaveDefinition> WaveDefinitions => waveCatalog?.waves;
 
     public event Action<ResortPhase> PhaseChanged;
+    public event Action<BuildingType> BuildingUpgraded;
     public event Action FinalWaveRewardsClaimed;
 
     private void Start()
@@ -148,6 +149,30 @@ public sealed class GameController : MonoBehaviour
         }
 
         return session.TryPurchaseBuilding(definition, Workers, out error);
+    }
+
+    // Returns null when the next level can be purchased.
+    public string GetBuildingUpgradeBlockReason(BuildingType type) =>
+        IsInitialized && definitions.TryGetValue(type, out BuildingDefinition definition)
+            ? session.GetUpgradeBlockReason(definition)
+            : "This building is unavailable.";
+
+    public bool TryUpgradeBuilding(BuildingType type, out string error)
+    {
+        if (!EnsureReady() || !definitions.TryGetValue(type, out BuildingDefinition definition))
+        {
+            error = "This building is unavailable.";
+            return false;
+        }
+
+        if (!session.TryUpgradeBuilding(definition, out error))
+            return false;
+
+        BuildingData building = Data.GetBuilding(type);
+        Debug.Log($"Upgraded {type} to level {building.level} for " +
+                  $"{definition.GetCostCoins(building.level)} Coins.", this);
+        BuildingUpgraded?.Invoke(type);
+        return true;
     }
 
     // Void entry points can also be connected directly to UI Button OnClick events.

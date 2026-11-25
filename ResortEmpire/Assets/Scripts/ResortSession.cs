@@ -59,6 +59,42 @@ public sealed class ResortSession
         return true;
     }
 
+    // Returns null when the selected owned building can be upgraded to the next level.
+    internal string GetUpgradeBlockReason(BuildingDefinition definition)
+    {
+        if (definition == null) return "Building definition is missing.";
+
+        BuildingData building = Data.GetBuilding(definition.Type);
+        if (building == null || !building.owned)
+            return "This building is not owned.";
+        if (!CanUpgradeBuildings)
+            return "Upgrade during preparation or upgrades.";
+        if (building.level < PurchaseLevel || building.level > definition.MaxLevel)
+            return "This building has an invalid level.";
+        if (building.level >= definition.MaxLevel)
+            return "This building is already at maximum level.";
+
+        int nextLevel = building.level + 1;
+        int cost = definition.GetCostCoins(nextLevel);
+        if (cost < 0) return "This upgrade has an invalid price.";
+        if (Data.coins < cost) return "Not enough Coins.";
+        return null;
+    }
+
+    // Applies a single upgrade. Failure does not modify coins or building state.
+    internal bool TryUpgradeBuilding(BuildingDefinition definition, out string error)
+    {
+        error = GetUpgradeBlockReason(definition);
+        if (error != null) return false;
+
+        BuildingData building = Data.GetBuilding(definition.Type);
+        int nextLevel = building.level + 1;
+        int cost = definition.GetCostCoins(nextLevel);
+        Data.coins -= cost;
+        building.level = nextLevel;
+        return true;
+    }
+
     public bool TryStartWave() => TryTransition(ResortPhase.AWAITING_WAVE, ResortPhase.WAVE_INCOMING);
 
     public bool TryBeginWave() => TryTransition(ResortPhase.WAVE_INCOMING, ResortPhase.WAVE_ACTIVE);
