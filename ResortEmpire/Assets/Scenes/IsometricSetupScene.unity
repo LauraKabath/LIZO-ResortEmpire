@@ -3520,75 +3520,79 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 599985445370138704, guid: 3644afa3ee9ab58439078206107c6ec1, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 599985445370138704, guid: 3644afa3ee9ab58439078206107c6ec1, type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 599985445370138704, guid: 3644afa3ee9ab58439078206107c6ec1, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 0
+      value: 146.785
       objectReference: {fileID: 0}
     - target: {fileID: 599985445370138704, guid: 3644afa3ee9ab58439078206107c6ec1, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: -22.5
       objectReference: {fileID: 0}
     - target: {fileID: 1097716991874752479, guid: 3644afa3ee9ab58439078206107c6ec1, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1097716991874752479, guid: 3644afa3ee9ab58439078206107c6ec1, type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1097716991874752479, guid: 3644afa3ee9ab58439078206107c6ec1, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 0
+      value: 243.57
       objectReference: {fileID: 0}
     - target: {fileID: 1097716991874752479, guid: 3644afa3ee9ab58439078206107c6ec1, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 0
+      value: 45
       objectReference: {fileID: 0}
     - target: {fileID: 1097716991874752479, guid: 3644afa3ee9ab58439078206107c6ec1, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 0
+      value: 225
       objectReference: {fileID: 0}
     - target: {fileID: 1097716991874752479, guid: 3644afa3ee9ab58439078206107c6ec1, type: 3}
       propertyPath: m_AnchoredPosition.y
+      value: -127.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1219897126126151981, guid: 3644afa3ee9ab58439078206107c6ec1, type: 3}
+      propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1892479448383869992, guid: 3644afa3ee9ab58439078206107c6ec1, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1892479448383869992, guid: 3644afa3ee9ab58439078206107c6ec1, type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1892479448383869992, guid: 3644afa3ee9ab58439078206107c6ec1, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 0
+      value: 22.5
       objectReference: {fileID: 0}
     - target: {fileID: 1892479448383869992, guid: 3644afa3ee9ab58439078206107c6ec1, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: -22.5
       objectReference: {fileID: 0}
     - target: {fileID: 2105275672622129703, guid: 3644afa3ee9ab58439078206107c6ec1, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2105275672622129703, guid: 3644afa3ee9ab58439078206107c6ec1, type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2105275672622129703, guid: 3644afa3ee9ab58439078206107c6ec1, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 0
+      value: 505
       objectReference: {fileID: 0}
     - target: {fileID: 2105275672622129703, guid: 3644afa3ee9ab58439078206107c6ec1, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: -82.5
       objectReference: {fileID: 0}
     - target: {fileID: 3142299078496337604, guid: 3644afa3ee9ab58439078206107c6ec1, type: 3}
       propertyPath: gameController
@@ -3600,43 +3604,43 @@ PrefabInstance:
       objectReference: {fileID: 1635358981}
     - target: {fileID: 3299468130899281105, guid: 3644afa3ee9ab58439078206107c6ec1, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3299468130899281105, guid: 3644afa3ee9ab58439078206107c6ec1, type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3299468130899281105, guid: 3644afa3ee9ab58439078206107c6ec1, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 0
+      value: 384.75
       objectReference: {fileID: 0}
     - target: {fileID: 3299468130899281105, guid: 3644afa3ee9ab58439078206107c6ec1, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 0
+      value: 26.269533
       objectReference: {fileID: 0}
     - target: {fileID: 3299468130899281105, guid: 3644afa3ee9ab58439078206107c6ec1, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 0
+      value: 225
       objectReference: {fileID: 0}
     - target: {fileID: 3299468130899281105, guid: 3644afa3ee9ab58439078206107c6ec1, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: -66.865234
       objectReference: {fileID: 0}
     - target: {fileID: 6252467357840149796, guid: 3644afa3ee9ab58439078206107c6ec1, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6252467357840149796, guid: 3644afa3ee9ab58439078206107c6ec1, type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6252467357840149796, guid: 3644afa3ee9ab58439078206107c6ec1, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 0
+      value: 350
       objectReference: {fileID: 0}
     - target: {fileID: 6252467357840149796, guid: 3644afa3ee9ab58439078206107c6ec1, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: -50
       objectReference: {fileID: 0}
     - target: {fileID: 6643285095062936560, guid: 3644afa3ee9ab58439078206107c6ec1, type: 3}
       propertyPath: m_Name
@@ -3644,43 +3648,43 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7343750883647278321, guid: 3644afa3ee9ab58439078206107c6ec1, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7343750883647278321, guid: 3644afa3ee9ab58439078206107c6ec1, type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7343750883647278321, guid: 3644afa3ee9ab58439078206107c6ec1, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 0
+      value: 269.53
       objectReference: {fileID: 0}
     - target: {fileID: 7343750883647278321, guid: 3644afa3ee9ab58439078206107c6ec1, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 0
+      value: 28.730469
       objectReference: {fileID: 0}
     - target: {fileID: 7343750883647278321, guid: 3644afa3ee9ab58439078206107c6ec1, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 0
+      value: 225
       objectReference: {fileID: 0}
     - target: {fileID: 7343750883647278321, guid: 3644afa3ee9ab58439078206107c6ec1, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: -14.365234
       objectReference: {fileID: 0}
     - target: {fileID: 7386732667369418140, guid: 3644afa3ee9ab58439078206107c6ec1, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7386732667369418140, guid: 3644afa3ee9ab58439078206107c6ec1, type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7386732667369418140, guid: 3644afa3ee9ab58439078206107c6ec1, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 0
+      value: 650
       objectReference: {fileID: 0}
     - target: {fileID: 7386732667369418140, guid: 3644afa3ee9ab58439078206107c6ec1, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: -50
       objectReference: {fileID: 0}
     - target: {fileID: 8206638076047358699, guid: 3644afa3ee9ab58439078206107c6ec1, type: 3}
       propertyPath: m_Pivot.x
@@ -3764,19 +3768,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8445844038684761268, guid: 3644afa3ee9ab58439078206107c6ec1, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8445844038684761268, guid: 3644afa3ee9ab58439078206107c6ec1, type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8445844038684761268, guid: 3644afa3ee9ab58439078206107c6ec1, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 0
+      value: 142.5
       objectReference: {fileID: 0}
     - target: {fileID: 8445844038684761268, guid: 3644afa3ee9ab58439078206107c6ec1, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: -82.5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -8455,8 +8459,9 @@ GameObject:
   - component: {fileID: 1496339537}
   - component: {fileID: 1496339538}
   - component: {fileID: 1496339539}
+  - component: {fileID: 1496339540}
   m_Layer: 0
-  m_Name: ReceptionLv1_0
+  m_Name: Reception
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -8511,12 +8516,12 @@ SpriteRenderer:
   m_SortingLayer: 1
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -9193115099775354150, guid: e72493140e9dff74b9c209464a23325c, type: 3}
+  m_Sprite: {fileID: 21300000, guid: e72493140e9dff74b9c209464a23325c, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 2.46, y: 2.42}
+  m_Size: {x: 2.56, y: 2.56}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -8575,8 +8580,8 @@ PolygonCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 2.46, y: 2.42}
-    newSize: {x: 2.46, y: 2.42}
+    oldSize: {x: 2.56, y: 2.56}
+    newSize: {x: 2.56, y: 2.56}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
@@ -8722,6 +8727,22 @@ MonoBehaviour:
   gameController: {fileID: 677912519}
   buildingType: 0
   icon: {fileID: 1982649425}
+--- !u!114 &1496339540
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1496339534}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 082773c05cb866942b058a074a3296ab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BuildingLevelVisuals
+  gameController: {fileID: 677912519}
+  level1Sprite: {fileID: 21300000, guid: e72493140e9dff74b9c209464a23325c, type: 3}
+  level2Sprite: {fileID: 21300000, guid: 19eb94f1c83b56d4989b17c10289d182, type: 3}
+  level3Sprite: {fileID: 21300000, guid: c250da88993a4914697d145d175052ef, type: 3}
 --- !u!1 &1527269610
 GameObject:
   m_ObjectHideFlags: 0
@@ -10471,8 +10492,9 @@ GameObject:
   - component: {fileID: 1661503586}
   - component: {fileID: 1661503585}
   - component: {fileID: 1661503589}
+  - component: {fileID: 1661503590}
   m_Layer: 0
-  m_Name: PoolLv1_0
+  m_Name: Pool
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10532,8 +10554,8 @@ PolygonCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 2.47, y: 2.11}
-    newSize: {x: 2.47, y: 2.11}
+    oldSize: {x: 2.56, y: 2.56}
+    newSize: {x: 2.56, y: 2.56}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
@@ -10594,12 +10616,12 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 1
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -7331836470985750340, guid: d9122d5cc02481542b7a985d25122b38, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 553ac2c785a96964290dede44ecfd3c5, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 2.47, y: 2.11}
+  m_Size: {x: 2.56, y: 2.56}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -10635,6 +10657,22 @@ MonoBehaviour:
   gameController: {fileID: 677912519}
   buildingType: 3
   icon: {fileID: 187502622}
+--- !u!114 &1661503590
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1661503584}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 082773c05cb866942b058a074a3296ab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BuildingLevelVisuals
+  gameController: {fileID: 677912519}
+  level1Sprite: {fileID: 21300000, guid: d9122d5cc02481542b7a985d25122b38, type: 3}
+  level2Sprite: {fileID: 21300000, guid: 36ec2a387ee42814f845160e8b1d2d10, type: 3}
+  level3Sprite: {fileID: 21300000, guid: db6b753ec1fb5cc4ba15c813052ad2ed, type: 3}
 --- !u!1 &1670194544
 GameObject:
   m_ObjectHideFlags: 0
@@ -10648,8 +10686,9 @@ GameObject:
   - component: {fileID: 1670194546}
   - component: {fileID: 1670194545}
   - component: {fileID: 1670194549}
+  - component: {fileID: 1670194550}
   m_Layer: 0
-  m_Name: BungalowsLv1_0
+  m_Name: Bungalows
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10709,8 +10748,8 @@ PolygonCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 2.54, y: 2.39}
-    newSize: {x: 2.54, y: 2.39}
+    oldSize: {x: 2.56, y: 2.56}
+    newSize: {x: 2.56, y: 2.56}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
@@ -10771,12 +10810,12 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 1
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -2377965407003096269, guid: 054dd32be7278194c9c2015871bcdba0, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 4c4b2b87882a9a34ea6d10d9c863cf75, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 2.54, y: 2.39}
+  m_Size: {x: 2.56, y: 2.56}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -10812,6 +10851,22 @@ MonoBehaviour:
   gameController: {fileID: 677912519}
   buildingType: 4
   icon: {fileID: 1322497920}
+--- !u!114 &1670194550
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1670194544}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 082773c05cb866942b058a074a3296ab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BuildingLevelVisuals
+  gameController: {fileID: 677912519}
+  level1Sprite: {fileID: 21300000, guid: 054dd32be7278194c9c2015871bcdba0, type: 3}
+  level2Sprite: {fileID: 21300000, guid: 8ad8d4526fb5fec4fb24a97a0b035ff7, type: 3}
+  level3Sprite: {fileID: 21300000, guid: 4275f5bdc26d4094e8be2f21603bb179, type: 3}
 --- !u!1 &1670715890
 GameObject:
   m_ObjectHideFlags: 0
@@ -11954,8 +12009,9 @@ GameObject:
   - component: {fileID: 1853325445}
   - component: {fileID: 1853325446}
   - component: {fileID: 1853325447}
+  - component: {fileID: 1853325448}
   m_Layer: 0
-  m_Name: BeachBarLv1_0
+  m_Name: BeachBar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -12010,12 +12066,12 @@ SpriteRenderer:
   m_SortingLayer: 1
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 1225796908199211350, guid: 781541c90a481b740ae0be4f785ac9bd, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 781541c90a481b740ae0be4f785ac9bd, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 2.35, y: 2.3}
+  m_Size: {x: 2.56, y: 2.56}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -12074,8 +12130,8 @@ PolygonCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 2.35, y: 2.3}
-    newSize: {x: 2.35, y: 2.3}
+    oldSize: {x: 2.56, y: 2.56}
+    newSize: {x: 2.56, y: 2.56}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
@@ -12215,6 +12271,22 @@ MonoBehaviour:
   gameController: {fileID: 677912519}
   buildingType: 2
   icon: {fileID: 14693920}
+--- !u!114 &1853325448
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1853325442}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 082773c05cb866942b058a074a3296ab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BuildingLevelVisuals
+  gameController: {fileID: 677912519}
+  level1Sprite: {fileID: 21300000, guid: 781541c90a481b740ae0be4f785ac9bd, type: 3}
+  level2Sprite: {fileID: 21300000, guid: 8d6b7b23f3756694aae6eda6157aed24, type: 3}
+  level3Sprite: {fileID: 21300000, guid: 591e628db1ccc23459f64080855fe7c8, type: 3}
 --- !u!114 &1891361840 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 7640743461443765688, guid: 816dc304f1bc42247b1bb7546d478a6d, type: 3}
@@ -12708,8 +12780,9 @@ GameObject:
   - component: {fileID: 2095811876}
   - component: {fileID: 2095811877}
   - component: {fileID: 2095811878}
+  - component: {fileID: 2095811879}
   m_Layer: 0
-  m_Name: RestaurantLv1_0
+  m_Name: Restaurant
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -12764,12 +12837,12 @@ SpriteRenderer:
   m_SortingLayer: 1
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -1031780459092653932, guid: 70b03cfcb0c04f2489fccabda840e91b, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 70b03cfcb0c04f2489fccabda840e91b, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 1
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 2.36, y: 2.33}
+  m_Size: {x: 2.56, y: 2.56}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -12828,8 +12901,8 @@ PolygonCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 2.36, y: 2.33}
-    newSize: {x: 2.36, y: 2.33}
+    oldSize: {x: 2.56, y: 2.56}
+    newSize: {x: 2.56, y: 2.56}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
@@ -12968,6 +13041,22 @@ MonoBehaviour:
   gameController: {fileID: 677912519}
   buildingType: 1
   icon: {fileID: 119843551}
+--- !u!114 &2095811879
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2095811873}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 082773c05cb866942b058a074a3296ab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BuildingLevelVisuals
+  gameController: {fileID: 677912519}
+  level1Sprite: {fileID: 21300000, guid: 70b03cfcb0c04f2489fccabda840e91b, type: 3}
+  level2Sprite: {fileID: 21300000, guid: eae4dd436645bee4f8646036b5841a67, type: 3}
+  level3Sprite: {fileID: 21300000, guid: 5d1852ec0ae432940b4758755624bd92, type: 3}
 --- !u!1001 &2119795495
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -43988,51 +44077,51 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3064235153943862151, guid: 816dc304f1bc42247b1bb7546d478a6d, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3064235153943862151, guid: 816dc304f1bc42247b1bb7546d478a6d, type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3064235153943862151, guid: 816dc304f1bc42247b1bb7546d478a6d, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 0
+      value: 722.5
       objectReference: {fileID: 0}
     - target: {fileID: 3064235153943862151, guid: 816dc304f1bc42247b1bb7546d478a6d, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 0
+      value: 510
       objectReference: {fileID: 0}
     - target: {fileID: 3064235153943862151, guid: 816dc304f1bc42247b1bb7546d478a6d, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 0
+      value: 1118.75
       objectReference: {fileID: 0}
     - target: {fileID: 3064235153943862151, guid: 816dc304f1bc42247b1bb7546d478a6d, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: -255
       objectReference: {fileID: 0}
     - target: {fileID: 4141186603937567660, guid: 816dc304f1bc42247b1bb7546d478a6d, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4141186603937567660, guid: 816dc304f1bc42247b1bb7546d478a6d, type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4141186603937567660, guid: 816dc304f1bc42247b1bb7546d478a6d, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 0
+      value: 722.5
       objectReference: {fileID: 0}
     - target: {fileID: 4141186603937567660, guid: 816dc304f1bc42247b1bb7546d478a6d, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 0
+      value: 510
       objectReference: {fileID: 0}
     - target: {fileID: 4141186603937567660, guid: 816dc304f1bc42247b1bb7546d478a6d, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 0
+      value: 361.25
       objectReference: {fileID: 0}
     - target: {fileID: 4141186603937567660, guid: 816dc304f1bc42247b1bb7546d478a6d, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: -255
       objectReference: {fileID: 0}
     - target: {fileID: 4539230379541377526, guid: 816dc304f1bc42247b1bb7546d478a6d, type: 3}
       propertyPath: m_Pivot.x
@@ -44132,7 +44221,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8946757967627831686, guid: 816dc304f1bc42247b1bb7546d478a6d, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 9156506848815641149, guid: 816dc304f1bc42247b1bb7546d478a6d, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
