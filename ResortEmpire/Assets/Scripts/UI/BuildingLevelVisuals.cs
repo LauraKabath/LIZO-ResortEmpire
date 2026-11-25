@@ -49,18 +49,25 @@ public sealed class BuildingLevelVisuals : MonoBehaviour
         if (tapTarget != null && tapTarget.Type == type)
             SyncOwnedLevel();
     }
-
-    // Public so BuildingUnlockVisuals can restore the correct owned level
-    // after switching from a construction plot to a finished building.
-    public void ApplyLevel(int level)
+    
+    
+    public Sprite GetSpriteForLevel(int level)
     {
-        Sprite sprite = level switch
+        return level switch
         {
             1 => level1Sprite,
             2 => level2Sprite,
             3 => level3Sprite,
             _ => null
         };
+    }
+
+
+    // Public so BuildingUnlockVisuals can restore the correct owned level
+    // after switching from a construction plot to a finished building.
+    public void ApplyLevel(int level)
+    {
+        Sprite sprite = GetSpriteForLevel(level);
 
         if (sprite == null)
         {

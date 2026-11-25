@@ -10,6 +10,13 @@ public sealed class BuildingPopupView : MonoBehaviour
     [SerializeField] private RectTransform slotsContainer;
     [SerializeField] private VisitorSlotView[] visitorSlots = new VisitorSlotView[0];
     [SerializeField] private Sprite[] guestPortraitSprites = new Sprite[0];
+    
+    [Header("Building actions")]
+    [SerializeField] private Button workersButton;
+    [SerializeField] private Button upgradeButton;
+
+    public Button WorkersButton => workersButton;
+    public Button UpgradeButton => upgradeButton;
 
     [Header("Slot layout")]
     [SerializeField, Min(1)] private float maximumSlotSize = 86;

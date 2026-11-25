@@ -71,8 +71,6 @@ public sealed class WorkerAllocationPanelUI : MonoBehaviour
 
     private void OnEnable()
     {
-        if (buildingDetailsUI != null)
-            buildingDetailsUI.BuildingSelected += OnBuildingSelected;
         ConnectRoster();
     }
 
@@ -84,8 +82,6 @@ public sealed class WorkerAllocationPanelUI : MonoBehaviour
 
     private void OnDisable()
     {
-        if (buildingDetailsUI != null)
-            buildingDetailsUI.BuildingSelected -= OnBuildingSelected;
         if (roster != null) roster.Changed -= Refresh;
         roster = null;
     }

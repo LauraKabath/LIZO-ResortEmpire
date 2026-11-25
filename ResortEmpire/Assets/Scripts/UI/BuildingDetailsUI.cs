@@ -7,6 +7,10 @@ using UnityEngine;
 [DisallowMultipleComponent]
 public sealed class BuildingDetailsUI : MonoBehaviour
 {
+    [Header("Building action panels")]
+    [SerializeField] private WorkerAllocationPanelUI workerAllocationPanel;
+    [SerializeField] private BuildingUpgradePanelUI buildingUpgradePanel;
+    
     [SerializeField] private GameController gameController;
     [SerializeField] private TapInputRouter tapInputRouter;
     [SerializeField] private Camera worldCamera;
@@ -38,6 +42,10 @@ public sealed class BuildingDetailsUI : MonoBehaviour
     private void Awake()
     {
         if (worldCamera == null) worldCamera = Camera.main;
+        if (popupView != null && popupView.WorkersButton != null)
+            popupView.WorkersButton.onClick.AddListener(OpenWorkers);
+        if (popupView != null && popupView.UpgradeButton != null)
+            popupView.UpgradeButton.onClick.AddListener(OpenUpgrade);
         if (canvasRect == null || popupView == null || !popupView.IsConfigured)
         {
             Debug.LogError("Assign the scene Canvas and configured Building Popup prefab to Building Details UI.", this);
@@ -45,6 +53,49 @@ public sealed class BuildingDetailsUI : MonoBehaviour
             return;
         }
         Hide();
+    }
+    
+    private void OpenWorkers()
+    {
+        if (selected == null || gameController == null)
+            return;
+
+        if (!gameController.CanManageWorkers)
+            return;
+        
+        if (buildingUpgradePanel != null)
+            buildingUpgradePanel.Close();
+
+        if (workerAllocationPanel != null)
+            workerAllocationPanel.Open(selected.Type);
+    }
+    
+    private void OpenUpgrade()
+    {
+        if (selected == null ||
+            gameController == null ||
+            !gameController.CanUpgradeBuildings)
+            return;
+
+        BuildingType type = selected.Type;
+
+        // Do not show the Worker Allocation Panel
+        // and Upgrade Panel at the same time.
+        if (workerAllocationPanel != null)
+            workerAllocationPanel.Close();
+
+        Hide();
+
+        if (buildingUpgradePanel != null)
+            buildingUpgradePanel.Open(type);
+    }
+
+    private void OnDestroy()
+    {
+        if (popupView != null && popupView.WorkersButton != null)
+            popupView.WorkersButton.onClick.RemoveListener(OpenWorkers);
+        if (popupView != null && popupView.UpgradeButton != null)
+            popupView.UpgradeButton.onClick.RemoveListener(OpenUpgrade);
     }
 
     private void OnEnable()
@@ -126,6 +177,15 @@ public sealed class BuildingDetailsUI : MonoBehaviour
 
     private void RefreshPopup()
     {
+        if (popupView.WorkersButton != null)
+            popupView.WorkersButton.interactable =
+                gameController.CanManageWorkers;
+
+        if (popupView.UpgradeButton != null)
+            popupView.UpgradeButton.interactable =
+                gameController.CanUpgradeBuildings &&
+                buildingUpgradePanel != null;
+        
         BuildingData state = gameController.Data.GetBuilding(selected.Type);
         if (state == null) { Hide(); return; }
         BuildingDefinition definition = gameController.GetBuildingDefinition(selected.Type);
