@@ -33,6 +33,7 @@ public sealed class BuildingUpgradePanelUI : MonoBehaviour
     [SerializeField] private TMP_Text nextLevelText;
     [SerializeField] private TMP_Text capacityText;
     [SerializeField] private TMP_Text costText;
+    [SerializeField] private TMP_Text resortValueGainText;
 
     [Header("Buttons")]
     [SerializeField] private Button upgradeButton;
@@ -182,6 +183,9 @@ public sealed class BuildingUpgradePanelUI : MonoBehaviour
 
             if (upgradeButton != null)
                 upgradeButton.interactable = false;
+            
+            if (resortValueGainText != null)
+                resortValueGainText.gameObject.SetActive(false);
 
             return;
         }
@@ -189,6 +193,17 @@ public sealed class BuildingUpgradePanelUI : MonoBehaviour
         int nextLevel = currentLevel + 1;
         int nextCapacity = definition.GetCapacity(nextLevel);
         int upgradeCost = definition.GetCostCoins(nextLevel);
+        int resortValueGain =
+            gameController.GetResortValueGainForInvestment(upgradeCost);
+
+        if (resortValueGainText != null)
+        {
+            resortValueGainText.text =
+                $"+{resortValueGain:N0} Resort Value";
+
+            resortValueGainText.gameObject.SetActive(true);
+        }
+
 
         // Upgrade details
         if (nextLevelText != null)

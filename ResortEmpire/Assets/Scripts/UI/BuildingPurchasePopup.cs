@@ -15,6 +15,7 @@ public sealed class BuildingPurchasePopup : MonoBehaviour
     [SerializeField] private TMP_Text priceText;
     [SerializeField] private TMP_Text balanceText;
     [SerializeField] private TMP_Text feedback;
+    [SerializeField] private TMP_Text resortValueGainText;
 
     [Header("Tlačidlá")]
     [SerializeField] private Button purchaseButton;
@@ -83,6 +84,16 @@ public sealed class BuildingPurchasePopup : MonoBehaviour
         SetDetail(requirementText, $"Available after Wave {Definition.RequiredCompletedWave}");
         SetDetail(balanceText, $"You have: {AvailableCoins:N0}");
         SetDetail(feedback, blockReason ?? string.Empty);
+        
+        
+        if (resortValueGainText != null)
+        {
+            int valueGain =
+                gameController.GetResortValueGainForInvestment(PriceCoins);
+
+            resortValueGainText.text =
+                $"+{valueGain:N0} Resort Value";
+        }
 
         if (priceText != null)
         {

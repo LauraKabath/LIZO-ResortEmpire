@@ -37,6 +37,13 @@ public sealed class GameController : MonoBehaviour
     [Header("Wave evaluation")]
     [SerializeField]
     private WaveEvaluationSettings evaluationSettings = new WaveEvaluationSettings();
+    
+    [Header("Resort Value")]
+    [SerializeField, Min(0)]
+    private int resortValuePerStar = 10;
+
+    [SerializeField, Range(0f, 100f)]
+    private float resortValueInvestmentPercent = 10f;
 
     public WaveEvaluationResult LastWaveEvaluation { get; private set; }
     public WaveRewardResult LastWaveReward { get; private set; }
@@ -118,7 +125,25 @@ public sealed class GameController : MonoBehaviour
         // Satisfaction and rewards
         // Evaluate completed wave
         LastWaveEvaluation = WaveEvaluator.Evaluate(completedWave, evaluationSettings);
-        LastWaveReward = WaveRewardCalculator.Calculate(completedWave, LastWaveEvaluation, RewardSettings);
+        WaveRewardResult baseReward = WaveRewardCalculator.Calculate(
+            completedWave,
+            LastWaveEvaluation,
+            RewardSettings);
+
+        int valueGain = checked(
+            baseReward.ResortValue +
+            ResortValueCalculator.CalculateWaveGain(
+                LastWaveEvaluation.Stars,
+                resortValuePerStar));
+
+        LastWaveReward = new WaveRewardResult(
+            baseReward.WaveNumber,
+            baseReward.CompletedNeeds,
+            baseReward.Stars,
+            baseReward.IsPerfect,
+            baseReward.Coins,
+            baseReward.Energy,
+            valueGain);
         rewardClaimed = false;
         Debug.Log(
             $"Wave {completedWave.waveNumber} evaluation: " +
@@ -129,6 +154,47 @@ public sealed class GameController : MonoBehaviour
             this);
         session.TryCompleteWave();
         Debug.Log($"Wave {completedWave.waveNumber} complete after {completedWave.elapsedSeconds:F2}s: all generated needs served.", this);
+    }
+    
+    
+    public int GetResortValueGainForInvestment(int costCoins)
+    {
+        return ResortValueCalculator.CalculateInvestmentGain(
+            costCoins,
+            resortValueInvestmentPercent);
+    }
+
+    
+    private bool TryGetInvestmentValueGain(
+        int cost,
+        out int gain,
+        out string error)
+    {
+        gain = 0;
+        error = null;
+
+        try
+        {
+            gain = GetResortValueGainForInvestment(cost);
+
+            // Check for overflow before spending Coins.
+            checked
+            {
+                int newValue = Data.resortValue + gain;
+            }
+
+            return true;
+        }
+        catch (OverflowException)
+        {
+            error = "Resort Value limit exceeded.";
+            return false;
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            error = "Invalid Resort Value settings.";
+            return false;
+        }
     }
 
     public BuildingDefinition GetBuildingDefinition(BuildingType type) => definitions[type];
@@ -148,7 +214,16 @@ public sealed class GameController : MonoBehaviour
             return false;
         }
 
-        return session.TryPurchaseBuilding(definition, Workers, out error);
+        int price = definition.GetCostCoins(ResortSession.PurchaseLevel);
+
+        if (!TryGetInvestmentValueGain(price, out int gain, out error))
+            return false;
+
+        if (!session.TryPurchaseBuilding(definition, Workers, out error))
+            return false;
+
+        Data.resortValue += gain;
+        return true;
     }
 
     // Returns null when the next level can be purchased.
@@ -164,10 +239,32 @@ public sealed class GameController : MonoBehaviour
             error = "This building is unavailable.";
             return false;
         }
+        
+        BuildingData currentBuilding = Data.GetBuilding(type);
+
+        if (currentBuilding == null)
+        {
+            error = "Building not found.";
+            return false;
+        }
+        int nextLevel = currentBuilding.level + 1;
+        
+        if (nextLevel > definition.MaxLevel)
+        {
+            error = "This building is already at maximum level.";
+            return false;
+        }
+
+        int upgradePrice = definition.GetCostCoins(nextLevel);
+
+        if (!TryGetInvestmentValueGain(
+                upgradePrice, out int valueGain, out error))
+            return false;
 
         if (!session.TryUpgradeBuilding(definition, out error))
             return false;
-
+        
+        Data.resortValue += valueGain;
         BuildingData building = Data.GetBuilding(type);
         Debug.Log($"Upgraded {type} to level {building.level} for " +
                   $"{definition.GetCostCoins(building.level)} Coins.", this);
