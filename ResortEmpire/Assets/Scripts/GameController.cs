@@ -47,6 +47,8 @@ public sealed class GameController : MonoBehaviour
 
     public WaveEvaluationResult LastWaveEvaluation { get; private set; }
     public WaveRewardResult LastWaveReward { get; private set; }
+    public BuildingType? LastWaveBottleneck { get; private set; }
+    public double LastWaveBottleneckSeconds { get; private set; }
     public bool HasUnclaimedRewards => Phase == ResortPhase.WAVE_COMPLETE &&
                                        LastWaveReward != null && !rewardClaimed;
     private bool rewardClaimed;
@@ -117,7 +119,7 @@ public sealed class GameController : MonoBehaviour
         waveSimulation.Tick(Time.deltaTime);
         ServiceLoad.Update();
         if (!activeWaveData.isComplete) return;
-
+        EvaluateLongestBottleneck();
         // Keep the completed result even if a phase listener immediately prepares the next wave.
         WaveData completedWave = activeWaveData;
         session.TryResolveWave();
@@ -271,6 +273,74 @@ public sealed class GameController : MonoBehaviour
         BuildingUpgraded?.Invoke(type);
         return true;
     }
+    
+    
+    private void EvaluateLongestBottleneck()
+    {
+        LastWaveBottleneck = null;
+        LastWaveBottleneckSeconds = 0d;
+
+        if (ServiceLoad == null)
+            return;
+
+        const double epsilon = 1e-9;
+
+        foreach (ServiceLoad load in ServiceLoad.Loads)
+        {
+            double seconds = load.SecondsAsBottleneck;
+
+            if (seconds <= epsilon)
+                continue;
+
+            bool isLonger =
+                seconds > LastWaveBottleneckSeconds + epsilon;
+
+            bool isTie =
+                Math.Abs(seconds - LastWaveBottleneckSeconds)
+                <= epsilon;
+
+            bool winsTie =
+                isTie &&
+                LastWaveBottleneck.HasValue &&
+                (int)load.Building < (int)LastWaveBottleneck.Value;
+
+            if (!LastWaveBottleneck.HasValue ||
+                isLonger ||
+                winsTie)
+            {
+                LastWaveBottleneck = load.Building;
+                LastWaveBottleneckSeconds = seconds;
+            }
+        }
+
+        // Diagnostic output for SCRUM-199.
+        foreach (ServiceLoad load in ServiceLoad.Loads)
+        {
+            Debug.Log(
+                $"[SCRUM-199] {load.Building}: " +
+                $"Total: {load.SecondsAsBottleneck:F2}s, " +
+                $"Missing Worker: {load.SecondsMissingWorker:F2}s, " +
+                $"Insufficient Capacity: {load.SecondsInsufficientCapacity:F2}s, " +
+                $"Peak Queue: {load.PeakQueue}.",
+                this);
+        }
+
+        if (LastWaveBottleneck.HasValue)
+        {
+            Debug.Log(
+                $"[SCRUM-199] Longest bottleneck: " +
+                $"{LastWaveBottleneck.Value}, " +
+                $"{LastWaveBottleneckSeconds:F2}s.",
+                this);
+        }
+        else
+        {
+            Debug.Log(
+                "[SCRUM-199] No bottleneck detected.",
+                this);
+        }
+    }
+
 
     // Void entry points can also be connected directly to UI Button OnClick events.
     [ContextMenu("Wave/Start Wave")]
@@ -317,6 +387,8 @@ public sealed class GameController : MonoBehaviour
         }
 
         DetachWaveSimulation();
+        LastWaveBottleneck = null;
+        LastWaveBottleneckSeconds = 0d;
         waveSimulation = nextSimulation;
         activeWaveData = nextSimulation.Data;
         waveSimulation.NeedGenerated += HandleNeedGenerated;
@@ -447,6 +519,8 @@ public sealed class GameController : MonoBehaviour
         ClearActiveWave();
         LastWaveEvaluation = null;
         LastWaveReward = null;
+        LastWaveBottleneck = null;
+        LastWaveBottleneckSeconds = 0d;
         rewardClaimed = false;
         UpdateBuildingPurchaseAvailability(waveNumber - 1);
         session.PrepareWaveForTesting(waveNumber);

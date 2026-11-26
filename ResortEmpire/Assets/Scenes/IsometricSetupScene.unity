@@ -10274,6 +10274,7 @@ MonoBehaviour:
   priceText: {fileID: 638207754}
   balanceText: {fileID: 1675189246}
   feedback: {fileID: 1528748231}
+  resortValueGainText: {fileID: 1801701973}
   purchaseButton: {fileID: 2060051096}
   purchaseButtonLabel: {fileID: 0}
   closeButton: {fileID: 803388939}

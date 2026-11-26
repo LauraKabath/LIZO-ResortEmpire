@@ -30,6 +30,8 @@ public sealed class ServiceLoad
     public double ArrivalRate { get; internal set; }
     public double ServiceRate { get; internal set; }
     public double ServiceRateWithWorker { get; internal set; }
+    public double SecondsMissingWorker { get; internal set; }
+    public double SecondsInsufficientCapacity { get; internal set; }
 
     internal ServiceLoad(NeedType need, BuildingType building)
     {
@@ -77,7 +79,23 @@ public sealed class ServiceLoadMonitor
         {
             WaveNeedData need = wave.needs[index];
             ServiceLoad load = loads[index];
-            if (load.State == ServiceLoadState.BOTTLENECK) load.SecondsAsBottleneck += step;
+            
+            if (load.State == ServiceLoadState.BOTTLENECK)
+            {
+                load.SecondsAsBottleneck += step;
+
+                switch (load.Cause)
+                {
+                    case BottleneckCause.MISSING_WORKER:
+                        load.SecondsMissingWorker += step;
+                        break;
+
+                    case BottleneckCause.INSUFFICIENT_CAPACITY:
+                        load.SecondsInsufficientCapacity += step;
+                        break;
+                }
+            }
+
 
             int queue = need.QueueCount;
             load.QueueCount = queue;
