@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,13 +11,20 @@ public sealed class BuildingPopupView : MonoBehaviour
     [SerializeField] private RectTransform slotsContainer;
     [SerializeField] private VisitorSlotView[] visitorSlots = new VisitorSlotView[0];
     [SerializeField] private Sprite[] guestPortraitSprites = new Sprite[0];
-    
+
     [Header("Building actions")]
     [SerializeField] private Button workersButton;
     [SerializeField] private Button upgradeButton;
 
+    [Header("Energy boost")]
+    [SerializeField] private Button speedUpButton;
+    [SerializeField] private TMP_Text speedUpLabel;
+    [SerializeField] private GameObject boostIndicator;   
+    [SerializeField] private TMP_Text boostRemainingText;
+
     public Button WorkersButton => workersButton;
     public Button UpgradeButton => upgradeButton;
+    public Button SpeedUpButton => speedUpButton;
 
     [Header("Slot layout")]
     [SerializeField, Min(1)] private float maximumSlotSize = 86;
@@ -28,6 +36,10 @@ public sealed class BuildingPopupView : MonoBehaviour
 
     private int activeSlotCount = -1;
     private bool layoutDirty = true;
+
+    // Energy boost runtime state
+    private GameController boostGame;
+    private BuildingType boostType;
 
     public RectTransform PopupRect => (RectTransform)transform;
     public VisitorSlotView[] VisitorSlots => visitorSlots;
@@ -44,11 +56,21 @@ public sealed class BuildingPopupView : MonoBehaviour
     }
 
     private void OnEnable() => layoutDirty = true;
+
+    private void OnDisable()
+    {
+        if (speedUpButton != null)
+            speedUpButton.onClick.RemoveListener(OnSpeedUpClicked);
+    }
+
     private void OnValidate() => layoutDirty = true;
     private void OnRectTransformDimensionsChange() => layoutDirty = true;
 
     private void Update()
     {
+        if (Application.IsPlaying(gameObject))
+            RefreshEnergyBoost();
+
         if (!layoutDirty || !IsConfigured) return;
         if (!Application.IsPlaying(gameObject))
         {
@@ -77,6 +99,66 @@ public sealed class BuildingPopupView : MonoBehaviour
         }
         LayoutSlots(capacity);
         return true;
+    }
+
+    // Zavolaj pri otvoreni popupu / zmene vybranej budovy:
+    //   view.BindEnergyBoost(gameController, buildingType);
+    public void BindEnergyBoost(GameController game, BuildingType type)
+    {
+        boostGame = game;
+        boostType = type;
+
+        if (speedUpButton != null)
+        {
+            speedUpButton.onClick.RemoveListener(OnSpeedUpClicked);
+            speedUpButton.onClick.AddListener(OnSpeedUpClicked);
+        }
+
+        RefreshEnergyBoost();
+    }
+
+    private void OnSpeedUpClicked()
+    {
+        if (boostGame == null) return;
+        if (!boostGame.TryActivateEnergyBoost(boostType, out string error))
+            Debug.LogWarning(error, this);
+        RefreshEnergyBoost();
+    }
+
+    private void RefreshEnergyBoost()
+    {
+        if (boostGame == null || !boostGame.IsInitialized) return;
+
+        // Dostupne iba pocas aktivnej vlny.
+        bool waveActive = boostGame.Phase == ResortPhase.WAVE_ACTIVE;
+        bool boosted = waveActive && boostGame.IsEnergyBoostActive(boostType);
+        // null = da sa pouzit (stav, energia, raz za vlnu, vlastnena budova)
+        bool canBoost = waveActive && boostGame.GetEnergyBoostBlockReason(boostType) == null;
+
+        if (speedUpButton != null)
+        {
+            if (speedUpButton.gameObject.activeSelf != waveActive)
+                speedUpButton.gameObject.SetActive(waveActive);
+            speedUpButton.interactable = canBoost;
+        }
+
+        if (speedUpLabel != null)
+        {
+            string label = boostGame.HasUsedEnergyBoost(boostType)
+                ? "BOOSTED"
+                : $"BOOST {boostGame.EnergyBoostCost}";
+            if (speedUpLabel.text != label) speedUpLabel.text = label;
+        }
+
+        if (boostIndicator != null && boostIndicator.activeSelf != boosted)
+            boostIndicator.SetActive(boosted);
+
+        if (boosted && boostRemainingText != null)
+        {
+            string remaining = Mathf.CeilToInt(
+                (float)boostGame.GetEnergyBoostRemainingSeconds(boostType)) + "s";
+            if (boostRemainingText.text != remaining) boostRemainingText.text = remaining;
+        }
     }
 
     private void LayoutSlots(int capacity)

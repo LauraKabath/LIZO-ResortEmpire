@@ -188,6 +188,7 @@ public sealed class BuildingDetailsUI : MonoBehaviour
         
         BuildingData state = gameController.Data.GetBuilding(selected.Type);
         if (state == null) { Hide(); return; }
+        popupView.BindEnergyBoost(gameController, selected.Type);
         BuildingDefinition definition = gameController.GetBuildingDefinition(selected.Type);
         int capacity = definition.GetCapacity(state.level);
         if (!popupView.SetCapacity(capacity))
