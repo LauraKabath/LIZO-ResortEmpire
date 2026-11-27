@@ -7,66 +7,74 @@ using UnityEngine.UI;
 [DisallowMultipleComponent]
 public sealed class GameController : MonoBehaviour
 {
-    [Header("Building definitions")]
-    [SerializeField] private BuildingDefinition[] buildingDefinitions;
-    
-    [Header("New game initialization")]
-    [SerializeField]
+    [Header("Building definitions")] [SerializeField]
+    private BuildingDefinition[] buildingDefinitions;
+
+    [Header("New game initialization")] [SerializeField]
     private ResortInitialSettings initialSettings;
 
-    [Header("Wave settings")]
-    [SerializeField] private TextAsset waveDefinitionsFile;
+    [Header("Wave settings")] [SerializeField]
+    private TextAsset waveDefinitionsFile;
+
     [SerializeField, Range(45f, 180f)] private float waveDurationSeconds = 90f;
 
-    [Header("Prototype starting resources")]
-    [SerializeField, Min(0)] private int startingCoins = 100;
+    [Header("Prototype starting resources")] [SerializeField, Min(0)]
+    private int startingCoins = 100;
+
     [SerializeField, Min(0)] private int startingEnergy = 5;
     [SerializeField, Min(0)] private int startingResortValue;
 
-    [Header("Debugging")]
-    [SerializeField] private bool logPhaseChanges = true;
+    [Header("Debugging")] [SerializeField] private bool logPhaseChanges = true;
     [SerializeField] private bool logGeneratedNeeds = true;
     [SerializeField] private bool logServiceLoad = true;
 
-    [Header("Runtime data (created on Play)")]
-    [SerializeField] private ResortData resortData;
+    [Header("Runtime data (created on Play)")] [SerializeField]
+    private ResortData resortData;
+
     [SerializeField] private WaveData activeWaveData;
 
     [SerializeField] private Button startWaveButton;
-    
-    [Header("Wave evaluation")]
-    [SerializeField]
+
+    [Header("Wave evaluation")] [SerializeField]
     private WaveEvaluationSettings evaluationSettings = new WaveEvaluationSettings();
-    
-    [Header("Resort Value")]
-    [SerializeField, Min(0)]
+
+    [Header("Resort Value")] [SerializeField, Min(0)]
     private int resortValuePerStar = 10;
 
-    [SerializeField, Range(0f, 100f)]
-    private float resortValueInvestmentPercent = 10f;
+    [SerializeField, Range(0f, 100f)] private float resortValueInvestmentPercent = 10f;
+
+    [Header("Upgrade suggestions")] [SerializeField, Min(0f)]
+    private float minimumCapacityBottleneckSeconds = 1f;
 
     public WaveEvaluationResult LastWaveEvaluation { get; private set; }
     public WaveRewardResult LastWaveReward { get; private set; }
     public BuildingType? LastWaveBottleneck { get; private set; }
     public double LastWaveBottleneckSeconds { get; private set; }
+
     public bool HasUnclaimedRewards => Phase == ResortPhase.WAVE_COMPLETE &&
                                        LastWaveReward != null && !rewardClaimed;
+
     private bool rewardClaimed;
 
     private readonly Dictionary<BuildingType, BuildingDefinition> definitions =
         new Dictionary<BuildingType, BuildingDefinition>();
+
     private ResortSession session;
     private WaveCatalog waveCatalog;
     private WaveSimulation waveSimulation;
+    private bool upgradeSuggestionOpen;
 
     public bool IsInitialized => session != null;
     public ResortData Data => resortData;
     public WaveData ActiveWave => activeWaveData;
     public WorkerRoster Workers { get; private set; }
     public ServiceLoadMonitor ServiceLoad { get; private set; }
+    public UpgradeSuggestion LastUpgradeSuggestion { get; private set; }
     public ResortPhase Phase => session?.Phase ?? ResortPhase.AWAITING_WAVE;
+
     public bool CanStartWave => IsInitialized && session.CanStartWave &&
-        waveCatalog.GetWave(Data.nextWaveNumber) != null;
+                                waveCatalog.GetWave(Data.nextWaveNumber) != null;
+
     public bool CanManageWorkers => IsInitialized && session.CanManageWorkers;
 
     public bool CanUpgradeBuildings => IsInitialized && session.CanUpgradeBuildings;
@@ -79,6 +87,7 @@ public sealed class GameController : MonoBehaviour
     public event Action<ResortPhase> PhaseChanged;
     public event Action<BuildingType> BuildingUpgraded;
     public event Action FinalWaveRewardsClaimed;
+    public event Action<UpgradeSuggestion> UpgradeSuggestionReady;
 
     private void Start()
     {
@@ -120,6 +129,7 @@ public sealed class GameController : MonoBehaviour
         ServiceLoad.Update();
         if (!activeWaveData.isComplete) return;
         EvaluateLongestBottleneck();
+        EvaluateUpgradeSuggestion();
         // Keep the completed result even if a phase listener immediately prepares the next wave.
         WaveData completedWave = activeWaveData;
         session.TryResolveWave();
@@ -155,10 +165,12 @@ public sealed class GameController : MonoBehaviour
             $"{LastWaveEvaluation.AreaToImprove}",
             this);
         session.TryCompleteWave();
-        Debug.Log($"Wave {completedWave.waveNumber} complete after {completedWave.elapsedSeconds:F2}s: all generated needs served.", this);
+        Debug.Log(
+            $"Wave {completedWave.waveNumber} complete after {completedWave.elapsedSeconds:F2}s: all generated needs served.",
+            this);
     }
-    
-    
+
+
     public int GetResortValueGainForInvestment(int costCoins)
     {
         return ResortValueCalculator.CalculateInvestmentGain(
@@ -166,7 +178,7 @@ public sealed class GameController : MonoBehaviour
             resortValueInvestmentPercent);
     }
 
-    
+
     private bool TryGetInvestmentValueGain(
         int cost,
         out int gain,
@@ -241,7 +253,7 @@ public sealed class GameController : MonoBehaviour
             error = "This building is unavailable.";
             return false;
         }
-        
+
         BuildingData currentBuilding = Data.GetBuilding(type);
 
         if (currentBuilding == null)
@@ -249,8 +261,9 @@ public sealed class GameController : MonoBehaviour
             error = "Building not found.";
             return false;
         }
+
         int nextLevel = currentBuilding.level + 1;
-        
+
         if (nextLevel > definition.MaxLevel)
         {
             error = "This building is already at maximum level.";
@@ -265,7 +278,7 @@ public sealed class GameController : MonoBehaviour
 
         if (!session.TryUpgradeBuilding(definition, out error))
             return false;
-        
+
         Data.resortValue += valueGain;
         BuildingData building = Data.GetBuilding(type);
         Debug.Log($"Upgraded {type} to level {building.level} for " +
@@ -273,8 +286,8 @@ public sealed class GameController : MonoBehaviour
         BuildingUpgraded?.Invoke(type);
         return true;
     }
-    
-    
+
+
     private void EvaluateLongestBottleneck()
     {
         LastWaveBottleneck = null;
@@ -342,10 +355,121 @@ public sealed class GameController : MonoBehaviour
     }
 
 
+    private void EvaluateUpgradeSuggestion()
+    {
+        LastUpgradeSuggestion = null;
+
+        if (ServiceLoad == null ||
+            activeWaveData == null ||
+            IsFinalWave)
+        {
+            return;
+        }
+
+        const double epsilon = 1e-9;
+
+        ServiceLoad bestCandidate = null;
+        double longestCapacityTime = 0d;
+
+        foreach (ServiceLoad load in ServiceLoad.Loads)
+        {
+            BuildingData building = Data.GetBuilding(load.Building);
+
+            // Only owned buildings can be upgraded.
+            if (building == null || !building.owned)
+                continue;
+
+            if (!definitions.TryGetValue(
+                    load.Building,
+                    out BuildingDefinition definition))
+                continue;
+
+            // Do not suggest upgrades beyond the maximum level.
+            if (building.level >= definition.MaxLevel)
+                continue;
+
+            double capacityTime = load.SecondsInsufficientCapacity;
+            double missingWorkerTime = load.SecondsMissingWorker;
+
+            // Ignore insignificant capacity bottlenecks.
+            if (capacityTime + epsilon <
+                minimumCapacityBottleneckSeconds)
+                continue;
+
+            // Upgrade only when insufficient capacity
+            // was the dominant cause of the bottleneck.
+            if (capacityTime <= missingWorkerTime + epsilon)
+                continue;
+
+            bool isBetter =
+                bestCandidate == null ||
+                capacityTime > longestCapacityTime + epsilon;
+
+            bool isTie =
+                bestCandidate != null &&
+                Math.Abs(capacityTime - longestCapacityTime)
+                <= epsilon;
+
+            bool winsTie =
+                isTie &&
+                (int)load.Building < (int)bestCandidate.Building;
+
+            if (isBetter || winsTie)
+            {
+                bestCandidate = load;
+                longestCapacityTime = capacityTime;
+            }
+        }
+
+        if (bestCandidate == null)
+        {
+            Debug.Log(
+                "[SCRUM-200] No suitable upgrade recommendation.",
+                this);
+            return;
+        }
+
+        LastUpgradeSuggestion = new UpgradeSuggestion(
+            activeWaveData.waveNumber,
+            bestCandidate.Building,
+            longestCapacityTime);
+
+        Debug.Log(
+            $"[SCRUM-200] Recommended upgrade: " +
+            $"{bestCandidate.Building}, " +
+            $"capacity bottleneck " +
+            $"{longestCapacityTime:F2}s.",
+            this);
+    }
+
+    public void SetUpgradeSuggestionOpen(bool isOpen)
+    {
+        upgradeSuggestionOpen = isOpen;
+        RefreshStartWaveButton();
+    }
+
+    private void RefreshStartWaveButton()
+    {
+        if (startWaveButton == null)
+            return;
+
+        bool shouldBeVisible =
+            Phase == ResortPhase.AWAITING_WAVE &&
+            !upgradeSuggestionOpen;
+
+        startWaveButton.gameObject.SetActive(shouldBeVisible);
+
+        startWaveButton.interactable =
+            shouldBeVisible && CanStartWave;
+    }
+
+
     // Void entry points can also be connected directly to UI Button OnClick events.
     [ContextMenu("Wave/Start Wave")]
     public void StartWave()
     {
+        if (upgradeSuggestionOpen)
+            return;
         
         if (!EnsureReady()) return;
         if (!session.CanStartWave)
@@ -353,6 +477,7 @@ public sealed class GameController : MonoBehaviour
             Debug.LogWarning($"Cannot start a wave during {Phase}.", this);
             return;
         }
+
         WaveDefinition wave = waveCatalog.GetWave(Data.nextWaveNumber);
         if (wave == null)
         {
@@ -371,13 +496,17 @@ public sealed class GameController : MonoBehaviour
                 if (!building.owned)
                 {
                     if (wave.GetDemand(definition.ServicedNeed) > 0)
-                        Debug.Log($"Wave {wave.waveNumber}: {building.type} must be purchased before it can serve {definition.ServicedNeed}.", this);
+                        Debug.Log(
+                            $"Wave {wave.waveNumber}: {building.type} must be purchased before it can serve {definition.ServicedNeed}.",
+                            this);
                     continue;
                 }
+
                 services.Add(new WaveBuildingService(building, definition.ServicedNeed,
                     definition.GetCapacity(building.level), definition.ServiceTimeSeconds,
                     definition.UtilizationWithoutWorker));
             }
+
             nextSimulation = new WaveSimulation(wave, waveDurationSeconds, services);
         }
         catch (Exception exception)
@@ -390,6 +519,7 @@ public sealed class GameController : MonoBehaviour
         LastWaveBottleneck = null;
         LastWaveBottleneckSeconds = 0d;
         waveSimulation = nextSimulation;
+        LastUpgradeSuggestion = null;
         activeWaveData = nextSimulation.Data;
         waveSimulation.NeedGenerated += HandleNeedGenerated;
         waveSimulation.ArrivalsClosed += HandleArrivalsClosed;
@@ -398,7 +528,9 @@ public sealed class GameController : MonoBehaviour
         session.TryStartWave();
         // There is no incoming presentation yet, so enter the active phase immediately.
         session.TryBeginWave();
-        Debug.Log($"Wave {wave.waveNumber} started: {wave.guestCount} guests; needs arrive over {waveDurationSeconds:F2}s.", this);
+        Debug.Log(
+            $"Wave {wave.waveNumber} started: {wave.guestCount} guests; needs arrive over {waveDurationSeconds:F2}s.",
+            this);
     }
 
     [ContextMenu("Wave/Pause Wave")]
@@ -414,7 +546,7 @@ public sealed class GameController : MonoBehaviour
         if (EnsureReady() && !session.TryResumeWave())
             Debug.LogWarning($"Cannot resume a wave during {Phase}.", this);
     }
-    
+
     // Applies a previously calculated reward exactly once. Does not advance the wave.
     public bool TryClaimRewards(out string error)
     {
@@ -447,7 +579,7 @@ public sealed class GameController : MonoBehaviour
                   $"{LastWaveReward.ResortValue} Resort Value.", this);
         return true;
     }
-    
+
     // Direct UI Button.OnClick entry point: claim first, then continue when a next wave exists.
     [ContextMenu("Wave/Claim Rewards and Continue")]
     public void ClaimRewardsAndContinue()
@@ -457,10 +589,20 @@ public sealed class GameController : MonoBehaviour
             Debug.LogWarning(error, this);
             return;
         }
+
         if (IsFinalWave)
+        {
             FinishFinalWave();
+        }
         else
+        {
             NextWave();
+            if (Phase == ResortPhase.AWAITING_WAVE &&
+                LastUpgradeSuggestion != null)
+            {
+                UpgradeSuggestionReady?.Invoke(LastUpgradeSuggestion);
+            }
+        }
     }
 
     // Separate action for the last configured wave. Put the end-of-game flow here,
@@ -495,11 +637,13 @@ public sealed class GameController : MonoBehaviour
             Debug.LogWarning("Finish the current wave before preparing the next one.", this);
             return;
         }
+
         if (!rewardClaimed || LastWaveReward == null)
         {
             Debug.LogWarning("Claim the completed wave rewards before continuing.", this);
             return;
         }
+
         if (waveCatalog.GetWave(Data.nextWaveNumber + 1) == null)
         {
             Debug.LogWarning($"No definition configured for wave {Data.nextWaveNumber + 1}.", this);
@@ -521,6 +665,7 @@ public sealed class GameController : MonoBehaviour
         LastWaveReward = null;
         LastWaveBottleneck = null;
         LastWaveBottleneckSeconds = 0d;
+        LastUpgradeSuggestion = null;
         rewardClaimed = false;
         UpdateBuildingPurchaseAvailability(waveNumber - 1);
         session.PrepareWaveForTesting(waveNumber);
@@ -581,29 +726,34 @@ public sealed class GameController : MonoBehaviour
     {
         if (!logGeneratedNeeds) return;
         string destination = unit.seatedAtSeconds >= 0 ? "in service" : "queued";
-        Debug.Log($"[Wave {activeWaveData.waveNumber} @ {unit.arrivedAtSeconds:F2}s] Generated {unit.need} unit #{unit.id} -> {unit.building}: {destination} ({need.OccupiedSlots}/{need.capacity} slots, queue {need.QueueCount}).", this);
+        Debug.Log(
+            $"[Wave {activeWaveData.waveNumber} @ {unit.arrivedAtSeconds:F2}s] Generated {unit.need} unit #{unit.id} -> {unit.building}: {destination} ({need.OccupiedSlots}/{need.capacity} slots, queue {need.QueueCount}).",
+            this);
     }
 
     private void HandleArrivalsClosed()
     {
-        Debug.Log($"Wave {activeWaveData.waveNumber}: arrivals closed at {activeWaveData.arrivalDurationSeconds:F2}s; buildings continue serving until all slots and queues are empty.", this);
+        Debug.Log(
+            $"Wave {activeWaveData.waveNumber}: arrivals closed at {activeWaveData.arrivalDurationSeconds:F2}s; buildings continue serving until all slots and queues are empty.",
+            this);
     }
 
     private void HandleServiceLoadChanged(ServiceLoad load)
     {
         if (!logServiceLoad) return;
         string cause = load.State == ServiceLoadState.BOTTLENECK ? $" ({load.Cause})" : string.Empty;
-        Debug.Log($"[Wave {activeWaveData.waveNumber} @ {activeWaveData.elapsedSeconds:F2}s] {load.Need} at {load.Building}: {load.State}{cause}, queue {load.QueueCount}.", this);
+        Debug.Log(
+            $"[Wave {activeWaveData.waveNumber} @ {activeWaveData.elapsedSeconds:F2}s] {load.Need} at {load.Building}: {load.State}{cause}, queue {load.QueueCount}.",
+            this);
     }
 
     private void HandlePhaseChanged(ResortPhase phase)
     {
         if (logPhaseChanges)
             Debug.Log($"Wave {Data.nextWaveNumber}: {phase}", this);
-        
-        if (startWaveButton != null)
-            startWaveButton.interactable = CanStartWave;
-        
+
+        RefreshStartWaveButton();
+
         PhaseChanged?.Invoke(phase);
     }
 

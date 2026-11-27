@@ -30,6 +30,8 @@ public sealed class BuildingPurchasePopup : MonoBehaviour
     private GameController gameController;
 
     public event Action<BuildingType> Purchased;
+    public event Action Closed;
+    public bool IsOpen => gameObject.activeInHierarchy;
 
     public RectTransform PopupRect => (RectTransform)transform;
     public BuildingDefinition Definition { get; private set; }
@@ -69,8 +71,17 @@ public sealed class BuildingPurchasePopup : MonoBehaviour
         }
         else Refresh(error);
     }
+    
+    public void Hide()
+    {
+        if (!gameObject.activeSelf)
+            return;
 
-    public void Hide() => gameObject.SetActive(false);
+        gameObject.SetActive(false);
+        // Notify other UI controllers that the purchase popup has finished, whether through BUY or CLOSE.
+        Closed?.Invoke();
+    }
+
 
     private void Refresh(string blockReason)
     {
