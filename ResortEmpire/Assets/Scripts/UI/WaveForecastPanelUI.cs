@@ -35,7 +35,7 @@ public class WaveForecastPanelUI : MonoBehaviour
     {
         game = FindFirstObjectByType<GameController>();
         CaptureRowLabels();
-        SetExpanded(true);
+        SetExpanded(false);
     }
 
     private void OnEnable()
@@ -64,6 +64,7 @@ public class WaveForecastPanelUI : MonoBehaviour
         UnsubscribeRoster();
     }
 
+    
     private void HandlePhaseChanged(ResortPhase phase)
     {
         bool visible = phase == ResortPhase.AWAITING_WAVE;
@@ -72,7 +73,7 @@ public class WaveForecastPanelUI : MonoBehaviour
 
         if (visible)
         {
-            SetExpanded(true);
+            SetExpanded(false);
             RefreshNeeds();
         }
     }

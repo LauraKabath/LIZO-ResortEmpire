@@ -1,4 +1,4 @@
-
+using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -31,6 +31,10 @@ public sealed class BuildingUnlockNotificationUI : MonoBehaviour
     private readonly HashSet<int> shownAfterWaves = new HashSet<int>();
 
     private BuildingType? unlockedBuilding;
+    public event Action Closed;
+
+    public bool IsOpen =>
+        panelRoot != null && panelRoot.activeInHierarchy;
 
     private void Awake()
     {
@@ -192,15 +196,19 @@ public sealed class BuildingUnlockNotificationUI : MonoBehaviour
             return;
         }
 
-        // Hide the notification before opening the purchase popup.
-        Close();
-
         buildingPurchasePopup.Show(definition, gameController);
+        Close();
     }
-
+    
     public void Close()
     {
-        if (panelRoot != null)
-            panelRoot.SetActive(false);
+        if (panelRoot == null || !panelRoot.activeSelf)
+            return;
+
+        panelRoot.SetActive(false);
+
+        // Notify other panels that the unlock decision is finished.
+        Closed?.Invoke();
     }
+
 }

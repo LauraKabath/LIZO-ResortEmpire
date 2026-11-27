@@ -158,10 +158,12 @@ public static class WaveEvaluator
 
         string success = $"All {best.CompletedCount} {best.Need} needs were served; " +
                          $"average queue wait: {best.AverageWaitingSeconds:F1}s.";
+       
         string improve = worst.AverageWaitingSeconds > 0
-            ? $"Longest waits: {worst.Need} ({worst.AverageWaitingSeconds:F1}s on average). " +
-              "Consider assigning a Worker or improving service capacity."
-            : "No queue waiting was recorded. Maintain the current service performance.";
+            ? $"Longest average wait: {worst.Need} " +
+              $"({worst.AverageWaitingSeconds:F1}s)."
+            : "No queue waiting was recorded. " +
+              "Maintain the current service performance.";
 
         return new WaveEvaluationResult(wave.waveNumber, stars, score,
             weightedWait / totalWeight, details, success, improve);

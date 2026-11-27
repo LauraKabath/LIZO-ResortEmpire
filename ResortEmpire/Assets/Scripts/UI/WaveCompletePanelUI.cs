@@ -111,8 +111,32 @@ public sealed class WaveCompletePanelUI : MonoBehaviour
             satisfactionText.text = $"Avg. Satisfaction: {result.SatisfactionPercent:F0}%";
         if (successText != null)
             successText.text = result.Success;
+        
         if (improvementText != null)
-            improvementText.text = result.AreaToImprove;
+        {
+            string improvement = result.AreaToImprove;
+
+            UpgradeSuggestion suggestion =
+                gameController.LastUpgradeSuggestion;
+
+            // Add a concrete recommendation only when it belongs to the completed wave.
+            if (suggestion != null &&
+                suggestion.WaveNumber == result.WaveNumber)
+            {
+                BuildingDefinition definition =
+                    gameController.GetBuildingDefinition(
+                        suggestion.Building);
+
+                if (definition != null)
+                {
+                    improvement +=
+                        $"\nSuggested next step: Upgrade " +
+                        $"{definition.DisplayName} to increase capacity.";
+                }
+            }
+
+            improvementText.text = improvement;
+        }
         
         if (coinsRewardText != null)
             coinsRewardText.text = reward != null ? $"+{reward.Coins} Coins" : "Coins: unavailable";

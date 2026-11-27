@@ -11,6 +11,7 @@ public sealed class BuildingUnlockVisuals : MonoBehaviour
         public GameObject lockedVisual;
         public BuildingTapTarget tapTarget;
 
+        private BuildingLevelVisuals levelVisuals;
         private SpriteRenderer spriteRenderer;
         private PolygonCollider2D tapCollider;
         private Sprite finishedSprite;
@@ -19,6 +20,7 @@ public sealed class BuildingUnlockVisuals : MonoBehaviour
 
         public void Initialize()
         {
+            levelVisuals = tapTarget.GetComponent<BuildingLevelVisuals>();
             spriteRenderer = tapTarget.GetComponent<SpriteRenderer>();
             tapCollider = tapTarget.GetComponent<PolygonCollider2D>();
             finishedSprite = spriteRenderer.sprite;
@@ -33,19 +35,25 @@ public sealed class BuildingUnlockVisuals : MonoBehaviour
             bool locked = !building.owned && !building.availableToPurchase;
             if (lockedVisual != null) lockedVisual.SetActive(locked);
 
-            if (!locked)
+            tapTarget.gameObject.SetActive(!locked);
+            if (locked) return;
+
+            // An owned building must use its current level, not the cached Lv1 sprite.
+            if (building.owned && levelVisuals != null)
             {
-                bool showConstruction = !building.owned && constructionSprite != null;
-                Sprite sprite = showConstruction ? constructionSprite : finishedSprite;
-                if (spriteRenderer.sprite != sprite)
-                {
-                    spriteRenderer.sprite = sprite;
-                    if (showConstruction) SetConstructionCollider(sprite);
-                    else RestoreFinishedCollider();
-                }
+                levelVisuals.ApplyLevel(building.level);
+                return;
             }
 
-            tapTarget.gameObject.SetActive(!locked);
+            // Preserve the original construction-site and fallback behavior.
+            bool showConstruction = !building.owned && constructionSprite != null;
+            Sprite sprite = showConstruction ? constructionSprite : finishedSprite;
+            if (spriteRenderer.sprite != sprite)
+            {
+                spriteRenderer.sprite = sprite;
+                if (showConstruction) SetConstructionCollider(sprite);
+                else RestoreFinishedCollider();
+            }
         }
 
         private void SetConstructionCollider(Sprite sprite)

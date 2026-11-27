@@ -1,13 +1,10 @@
 fileFormatVersion: 2
-guid: 4c4b2b87882a9a34ea6d10d9c863cf75
+guid: d9122d5cc02481542b7a985d25122b38
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -2071997457785008541
-    second: bungalow0_0
-  - first:
-      213: 1700053090792161518
-    second: bungalow0_1
+      213: -7331836470985750340
+    second: PoolLv1_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -49,7 +46,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 2
+  spriteMode: 1
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -125,39 +122,43 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WindowsStoreApps
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: bungalow0_0
+      name: PoolLv1_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 256
-        height: 256
-      alignment: 9
-      pivot: {x: 0.5, y: 0.506977}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 36e46314a49ce33e0800000000000000
-      internalID: -2071997457785008541
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: bungalow0_1
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 222
-        width: 1
-        height: 5
+        x: 9
+        y: 23
+        width: 247
+        height: 211
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -166,8 +167,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: ee0c8ff574dc79710800000000000000
-      internalID: 1700053090792161518
+      spriteID: cb804ab4395104a90800000000000000
+      internalID: -7331836470985750340
       vertices: []
       indices: 
       edges: []
@@ -176,7 +177,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 5e97eb03825dee720800000000000000
     internalID: 0
     vertices: []
     indices: 
@@ -186,8 +187,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      bungalow0_0: -2071997457785008541
-      bungalow0_1: 1700053090792161518
+      PoolLv1_0: -7331836470985750340
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
