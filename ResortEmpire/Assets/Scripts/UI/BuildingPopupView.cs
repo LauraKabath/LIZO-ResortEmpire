@@ -55,7 +55,14 @@ public sealed class BuildingPopupView : MonoBehaviour
         }
     }
 
-    private void OnEnable() => layoutDirty = true;
+    
+    private void OnEnable()
+    {
+        layoutDirty = true;
+
+        if (Application.IsPlaying(gameObject) && speedUpButton != null)
+            speedUpButton.onClick.AddListener(OnSpeedUpClicked);
+    }
 
     private void OnDisable()
     {
@@ -107,12 +114,6 @@ public sealed class BuildingPopupView : MonoBehaviour
     {
         boostGame = game;
         boostType = type;
-
-        if (speedUpButton != null)
-        {
-            speedUpButton.onClick.RemoveListener(OnSpeedUpClicked);
-            speedUpButton.onClick.AddListener(OnSpeedUpClicked);
-        }
 
         RefreshEnergyBoost();
     }
