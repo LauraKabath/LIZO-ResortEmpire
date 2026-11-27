@@ -10,8 +10,29 @@ public sealed class WaveBuildingService
     public int Capacity { get; }
     public double ServiceTimeSeconds { get; }
     public double UtilizationWithoutWorker { get; }
+
+    // Per-wave Energy boost state (not part of the permanent building definition).
+    public bool BoostUsed { get; private set; }
+    public bool BoostActive { get; private set; }
+    public double BoostEndsAtSeconds { get; private set; }
+    private double boostSpeedMultiplier = 1d;
+
     public double ProgressPerSecond =>
-        (Building.assignedWorkerId == -1 ? UtilizationWithoutWorker : 1) / ServiceTimeSeconds;
+        (Building.assignedWorkerId == -1 ? UtilizationWithoutWorker : 1d)
+        / ServiceTimeSeconds * (BoostActive ? boostSpeedMultiplier : 1d);
+
+    internal void ActivateBoost(double endsAtSeconds, double speedMultiplier)
+    {
+        BoostUsed = true;
+        BoostActive = true;
+        BoostEndsAtSeconds = endsAtSeconds;
+        boostSpeedMultiplier = speedMultiplier;
+    }
+
+    internal void ExpireBoost()
+    {
+        BoostActive = false;
+    }
 
     public WaveBuildingService(BuildingData building, NeedType need, int capacity,
         double serviceTimeSeconds, double utilizationWithoutWorker)
@@ -39,6 +60,70 @@ public sealed class WaveSimulation
     public WaveData Data { get; }
     public event Action<WaveNeedData, NeedUnit> NeedGenerated;
     public event Action ArrivalsClosed;
+
+    public bool HasUsedEnergyBoost(BuildingType type)
+    {
+        WaveBuildingService service = FindService(type);
+        return service != null && service.BoostUsed;
+    }
+
+    public bool IsEnergyBoostActive(BuildingType type)
+    {
+        WaveBuildingService service = FindService(type);
+        return service != null && service.BoostActive;
+    }
+
+    public double GetEnergyBoostRemainingSeconds(BuildingType type)
+    {
+        WaveBuildingService service = FindService(type);
+        return service != null && service.BoostActive
+            ? Math.Max(0d, service.BoostEndsAtSeconds - Data.elapsedSeconds)
+            : 0d;
+    }
+
+    // The controller validates phase and Energy before requesting activation.
+    public bool TryActivateEnergyBoost(BuildingType type, double durationSeconds,
+        double speedMultiplier, out string error)
+    {
+        if (Data.isComplete)
+        {
+            error = "The wave is already complete.";
+            return false;
+        }
+
+        if (durationSeconds <= 0d || double.IsNaN(durationSeconds) ||
+            double.IsInfinity(durationSeconds) || speedMultiplier <= 1d ||
+            double.IsNaN(speedMultiplier) || double.IsInfinity(speedMultiplier))
+        {
+            error = "Invalid Energy boost configuration.";
+            return false;
+        }
+
+        WaveBuildingService service = FindService(type);
+        if (service == null)
+        {
+            error = "This building is not serving the current wave.";
+            return false;
+        }
+
+        if (service.BoostUsed)
+        {
+            error = "Energy boost has already been used on this building this wave.";
+            return false;
+        }
+
+        service.ActivateBoost(Data.elapsedSeconds + durationSeconds, speedMultiplier);
+        error = null;
+        return true;
+    }
+
+    private WaveBuildingService FindService(BuildingType type)
+    {
+        foreach (WaveBuildingService service in services)
+            if (service.Building.type == type)
+                return service;
+        return null;
+    }
 
     public WaveSimulation(WaveDefinition definition, double arrivalDurationSeconds,
         IEnumerable<WaveBuildingService> buildingServices)
@@ -97,8 +182,13 @@ public sealed class WaveSimulation
 
             for (int index = 0; index < services.Count; index++)
             {
+                WaveBuildingService service = services[index];
+                // A large frame cannot extend a boost past its exact expiration time.
+                if (service.BoostActive)
+                    nextTime = Math.Min(nextTime, service.BoostEndsAtSeconds);
+
                 WaveNeedData need = Data.needs[index];
-                double rate = services[index].ProgressPerSecond;
+                double rate = service.ProgressPerSecond;
                 need.fillRate = need.capacity * rate;
                 if (!Data.arrivalsClosed && need.demandArrived < need.demandTotal)
                     nextTime = Math.Min(nextTime, NextArrivalTime(need));
@@ -115,6 +205,17 @@ public sealed class WaveSimulation
                     unit.serviceProgress = Math.Min(1, unit.serviceProgress + step * rate);
             }
             Data.elapsedSeconds = nextTime;
+
+            // The preceding step was processed at boosted speed until this instant.
+            for (int index = 0; index < services.Count; index++)
+            {
+                WaveBuildingService service = services[index];
+                if (service.BoostActive && Data.elapsedSeconds >= service.BoostEndsAtSeconds)
+                    service.ExpireBoost();
+
+                Data.needs[index].fillRate =
+                    Data.needs[index].capacity * service.ProgressPerSecond;
+            }
 
             foreach (WaveNeedData need in Data.needs)
             {

@@ -1822,6 +1822,38 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1693844760413860208, guid: fe17ccc515d31d34c9f43fa837c4fe3d, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1693844760413860208, guid: fe17ccc515d31d34c9f43fa837c4fe3d, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1693844760413860208, guid: fe17ccc515d31d34c9f43fa837c4fe3d, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1693844760413860208, guid: fe17ccc515d31d34c9f43fa837c4fe3d, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1716298316598222798, guid: fe17ccc515d31d34c9f43fa837c4fe3d, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1716298316598222798, guid: fe17ccc515d31d34c9f43fa837c4fe3d, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1716298316598222798, guid: fe17ccc515d31d34c9f43fa837c4fe3d, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1716298316598222798, guid: fe17ccc515d31d34c9f43fa837c4fe3d, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2058199560842295484, guid: fe17ccc515d31d34c9f43fa837c4fe3d, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -4648,6 +4680,9 @@ MonoBehaviour:
   resortValuePerStar: 10
   resortValueInvestmentPercent: 10
   minimumCapacityBottleneckSeconds: 1
+  energyBoostCost: 3
+  energyBoostDurationSeconds: 15
+  energyBoostSpeedMultiplier: 2
 --- !u!4 &677912520
 Transform:
   m_ObjectHideFlags: 0
