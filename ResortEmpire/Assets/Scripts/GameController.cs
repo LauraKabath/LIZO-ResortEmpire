@@ -46,6 +46,11 @@ public sealed class GameController : MonoBehaviour
     [Header("Upgrade suggestions")] [SerializeField, Min(0f)]
     private float minimumCapacityBottleneckSeconds = 1f;
 
+    [Header("Energy boost")]
+    [SerializeField, Min(1)] private int energyBoostCost = 3;
+    [SerializeField, Min(0.1f)] private float energyBoostDurationSeconds = 15f;
+    [SerializeField, Min(1.01f)] private float energyBoostSpeedMultiplier = 2f;
+
     public WaveEvaluationResult LastWaveEvaluation { get; private set; }
     public WaveRewardResult LastWaveReward { get; private set; }
     public BuildingType? LastWaveBottleneck { get; private set; }
@@ -78,6 +83,60 @@ public sealed class GameController : MonoBehaviour
     public bool CanManageWorkers => IsInitialized && session.CanManageWorkers;
 
     public bool CanUpgradeBuildings => IsInitialized && session.CanUpgradeBuildings;
+
+    // Public interface for SCRUM-206 (Energy boost button UI).
+    public int EnergyBoostCost => energyBoostCost;
+    public float EnergyBoostDurationSeconds => energyBoostDurationSeconds;
+
+    public bool HasUsedEnergyBoost(BuildingType type) =>
+        waveSimulation != null && waveSimulation.HasUsedEnergyBoost(type);
+
+    public bool IsEnergyBoostActive(BuildingType type) =>
+        waveSimulation != null && waveSimulation.IsEnergyBoostActive(type);
+
+    public double GetEnergyBoostRemainingSeconds(BuildingType type) =>
+        waveSimulation != null ? waveSimulation.GetEnergyBoostRemainingSeconds(type) : 0d;
+
+    public string GetEnergyBoostBlockReason(BuildingType type)
+    {
+        if (!IsInitialized || Phase != ResortPhase.WAVE_ACTIVE || waveSimulation == null)
+            return "Energy boost is only available during an active wave.";
+        if (waveSimulation.Data.isComplete)
+            return "The wave is already complete.";
+        if (energyBoostCost < 1 || energyBoostDurationSeconds <= 0f ||
+            energyBoostSpeedMultiplier <= 1f)
+            return "Invalid Energy boost configuration.";
+        BuildingData building = Data.GetBuilding(type);
+        if (building == null || !building.owned)
+            return "This building is not owned.";
+        if (waveSimulation.HasUsedEnergyBoost(type))
+            return "Energy boost already used on this building this wave.";
+        if (Data.energy < energyBoostCost)
+            return $"Missing: {energyBoostCost - Data.energy} Energy";
+        return null;
+    }
+
+    public bool TryActivateEnergyBoost(BuildingType type, out string error)
+    {
+        if (!EnsureReady())
+        {
+            error = "The game is not initialized.";
+            return false;
+        }
+
+        error = GetEnergyBoostBlockReason(type);
+        if (error != null)
+            return false;
+
+        if (!waveSimulation.TryActivateEnergyBoost(type, energyBoostDurationSeconds,
+                energyBoostSpeedMultiplier, out error))
+            return false;
+
+        Data.energy -= energyBoostCost;
+        Debug.Log($"[SCRUM-205] Boosted {type} for {energyBoostDurationSeconds:F1}s " +
+                  $"at x{energyBoostSpeedMultiplier:F2} speed. Cost: {energyBoostCost} Energy.", this);
+        return true;
+    }
 
     // True when no wave after the current one is configured in Waves.json.
     public bool IsFinalWave => IsInitialized && waveCatalog.GetWave(Data.nextWaveNumber + 1) == null;
