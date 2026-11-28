@@ -38,7 +38,9 @@ public sealed class IsometricTestWaveSelector : MonoBehaviour
         if (!waveDropdown.interactable) return;
         if (waveNumbers.Length == 0)
         {
-            gameController.Data.coins = startingCoins;
+            // Test Coins only for a fresh game; a loaded save keeps its own Coins.
+            if (!gameController.StartedFromSave)
+                gameController.Data.coins = startingCoins;
             waveNumbers = gameController.WaveDefinitions.Select(wave => wave.waveNumber).OrderBy(number => number).ToArray();
             waveDropdown.ClearOptions();
             waveDropdown.AddOptions(waveNumbers.Select(number => $"Wave {number}").ToList());

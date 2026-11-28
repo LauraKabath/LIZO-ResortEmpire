@@ -34,6 +34,23 @@ public sealed class WaveBuildingService
         BoostActive = false;
     }
 
+    internal BoostSaveData CreateBoostSnapshot() => new BoostSaveData
+    {
+        building = Building.type,
+        used = BoostUsed,
+        active = BoostActive,
+        endsAtSeconds = BoostEndsAtSeconds,
+        speedMultiplier = boostSpeedMultiplier
+    };
+
+    internal void RestoreBoost(BoostSaveData saved)
+    {
+        BoostUsed = saved.used;
+        BoostActive = saved.active;
+        BoostEndsAtSeconds = saved.endsAtSeconds;
+        boostSpeedMultiplier = saved.active ? saved.speedMultiplier : 1d;
+    }
+
     public WaveBuildingService(BuildingData building, NeedType need, int capacity,
         double serviceTimeSeconds, double utilizationWithoutWorker)
     {
@@ -55,11 +72,22 @@ public sealed class WaveSimulation
 {
     private const double Epsilon = 1e-9;
     private readonly List<WaveBuildingService> services = new List<WaveBuildingService>();
-    private int nextUnitId = 1;
 
     public WaveData Data { get; }
     public event Action<WaveNeedData, NeedUnit> NeedGenerated;
     public event Action ArrivalsClosed;
+    public event Action<SuddenRushState> SuddenRushStarted;
+    public event Action<SuddenRushState> SuddenRushSkipped;
+
+    // Records the player's answer once. Phase and action checks belong to the controller.
+    public bool TryAnswerSuddenRush(SuddenRushChoice choice)
+    {
+        SuddenRushState rush = Data.suddenRush;
+        if (choice == SuddenRushChoice.NONE || rush == null || !rush.IsPromptPending || Data.isComplete)
+            return false;
+        rush.choice = choice;
+        return true;
+    }
 
     public bool HasUsedEnergyBoost(BuildingType type)
     {
@@ -125,6 +153,63 @@ public sealed class WaveSimulation
         return null;
     }
 
+    // Continues a saved wave exactly where it stopped: same guests, timers, rush and boosts.
+    // The services must be built from the same owned buildings, in the same order, as when the wave started.
+    public static WaveSimulation Restore(WaveData savedWave, IEnumerable<WaveBuildingService> buildingServices,
+        IEnumerable<BoostSaveData> boosts)
+    {
+        if (savedWave == null) throw new ArgumentNullException(nameof(savedWave));
+        if (buildingServices == null) throw new ArgumentNullException(nameof(buildingServices));
+
+        var simulation = new WaveSimulation(savedWave);
+        foreach (WaveBuildingService service in buildingServices)
+        {
+            if (service == null) throw new ArgumentException("A building service is missing.");
+            if (service.Building.owned) simulation.services.Add(service);
+        }
+
+        if (simulation.services.Count != savedWave.needs.Count)
+            throw new InvalidOperationException("The saved wave does not match the owned buildings.");
+        for (int index = 0; index < savedWave.needs.Count; index++)
+        {
+            WaveNeedData need = savedWave.needs[index];
+            WaveBuildingService service = simulation.services[index];
+            if (need.building != service.Building.type || need.need != service.Need || need.capacity != service.Capacity)
+                throw new InvalidOperationException($"The saved wave does not match {service.Building.type}.");
+        }
+
+        if (boosts != null)
+        {
+            foreach (BoostSaveData boost in boosts)
+            {
+                if (boost == null) continue;
+                WaveBuildingService service = simulation.FindService(boost.building);
+                if (service == null)
+                    throw new InvalidOperationException($"Saved Energy boost for {boost.building}, which is not in the wave.");
+                service.RestoreBoost(boost);
+            }
+        }
+
+        // Rates depend on the restored Workers and boosts.
+        for (int index = 0; index < savedWave.needs.Count; index++)
+            savedWave.needs[index].fillRate = savedWave.needs[index].capacity * simulation.services[index].ProgressPerSecond;
+        return simulation;
+    }
+
+    private WaveSimulation(WaveData savedWave)
+    {
+        Data = savedWave;
+        if (Data.suddenRush == null) Data.suddenRush = new SuddenRushState();
+    }
+
+    public List<BoostSaveData> CreateBoostSnapshots()
+    {
+        var boosts = new List<BoostSaveData>();
+        foreach (WaveBuildingService service in services)
+            if (service.BoostUsed) boosts.Add(service.CreateBoostSnapshot());
+        return boosts;
+    }
+
     public WaveSimulation(WaveDefinition definition, double arrivalDurationSeconds,
         IEnumerable<WaveBuildingService> buildingServices)
     {
@@ -163,6 +248,17 @@ public sealed class WaveSimulation
                 fillRate = service.Capacity * service.ProgressPerSecond
             });
         }
+
+        if (definition.HasSuddenRush)
+        {
+            Data.suddenRush = new SuddenRushState
+            {
+                planned = true,
+                startSeconds = definition.suddenRush.startSeconds,
+                durationSeconds = definition.suddenRush.durationSeconds,
+                units = definition.suddenRush.units
+            };
+        }
     }
 
     public void Tick(double deltaTime)
@@ -180,6 +276,13 @@ public sealed class WaveSimulation
             if (!Data.arrivalsClosed)
                 nextTime = Math.Min(nextTime, Data.arrivalDurationSeconds);
 
+            // The rush starts and its units arrive at exact wave times, whatever the frame length.
+            SuddenRushState rush = Data.suddenRush;
+            if (rush != null && rush.IsStillToStart)
+                nextTime = Math.Min(nextTime, Math.Max(Data.elapsedSeconds, rush.startSeconds));
+            if (rush != null && rush.IsArriving)
+                nextTime = Math.Min(nextTime, Math.Max(Data.elapsedSeconds, rush.NextArrivalSeconds));
+
             for (int index = 0; index < services.Count; index++)
             {
                 WaveBuildingService service = services[index];
@@ -190,7 +293,7 @@ public sealed class WaveSimulation
                 WaveNeedData need = Data.needs[index];
                 double rate = service.ProgressPerSecond;
                 need.fillRate = need.capacity * rate;
-                if (!Data.arrivalsClosed && need.demandArrived < need.demandTotal)
+                if (!Data.arrivalsClosed && need.RegularDemandArrived < need.RegularDemandTotal)
                     nextTime = Math.Min(nextTime, NextArrivalTime(need));
                 foreach (NeedUnit unit in need.inServiceUnits)
                     nextTime = Math.Min(nextTime,
@@ -217,6 +320,8 @@ public sealed class WaveSimulation
                     Data.needs[index].capacity * service.ProgressPerSecond;
             }
 
+            TryStartSuddenRush();
+
             foreach (WaveNeedData need in Data.needs)
             {
                 CompleteService(need);
@@ -237,27 +342,96 @@ public sealed class WaveSimulation
 
     private double NextArrivalTime(WaveNeedData need)
     {
-        // First arrival follows one interval; the final one lands exactly at the cutoff.
-        return Data.arrivalDurationSeconds * ((need.demandArrived + 1d) / need.demandTotal);
+        // Regular arrivals only. The first follows one interval; the final one lands exactly at the cutoff.
+        return Data.arrivalDurationSeconds * ((need.RegularDemandArrived + 1d) / need.RegularDemandTotal);
     }
 
     private void GenerateArrivals(WaveNeedData need)
     {
-        if (Data.arrivalsClosed) return;
-        while (need.demandArrived < need.demandTotal && NextArrivalTime(need) <= Data.elapsedSeconds)
+        if (!Data.arrivalsClosed)
         {
-            var unit = new NeedUnit
-            {
-                id = nextUnitId++,
-                need = need.need,
-                building = need.building,
-                arrivedAtSeconds = NextArrivalTime(need)
-            };
-            need.demandArrived++;
-            need.queuedUnits.Add(unit);
-            SeatWaitingUnits(need);
-            NeedGenerated?.Invoke(need, unit);
+            while (need.RegularDemandArrived < need.RegularDemandTotal &&
+                   NextArrivalTime(need) <= Data.elapsedSeconds)
+                AddArrival(need, NextArrivalTime(need));
         }
+
+        // Rush units keep arriving even if the regular arrival window has closed in the meantime.
+        SuddenRushState rush = Data.suddenRush;
+        if (rush == null || !rush.started || rush.need != need.need) return;
+        while (rush.IsArriving && rush.NextArrivalSeconds <= Data.elapsedSeconds)
+        {
+            double arrivedAt = rush.NextArrivalSeconds;
+            rush.arrived++;
+            need.rushArrived++;
+            AddArrival(need, arrivedAt);
+        }
+        if (!rush.IsArriving) need.rushArrivalRate = 0;
+    }
+
+    private void AddArrival(WaveNeedData need, double arrivedAtSeconds)
+    {
+        var unit = new NeedUnit
+        {
+            id = Data.nextUnitId++,
+            need = need.need,
+            building = need.building,
+            arrivedAtSeconds = arrivedAtSeconds
+        };
+        need.demandArrived++;
+        need.queuedUnits.Add(unit);
+        SeatWaitingUnits(need);
+        NeedGenerated?.Invoke(need, unit);
+    }
+
+    // Starts the rush once its time is reached. It targets a building without a Worker, so moving
+    // a Worker there is always a free answer. With several, the one with the most demand is chosen.
+    // The building the rush would hit if it started now. Before the start this is only a
+    // prediction: moving a Worker can still change it.
+    public bool TryGetSuddenRushTarget(out BuildingType building)
+    {
+        int target = FindSuddenRushTarget();
+        building = target >= 0 ? Data.needs[target].building : default;
+        return target >= 0;
+    }
+
+    private int FindSuddenRushTarget()
+    {
+        int target = -1;
+        for (int index = 0; index < services.Count; index++)
+        {
+            if (services[index].Building.assignedWorkerId != -1) continue;
+            if (target < 0) { target = index; continue; }
+
+            int demand = Data.needs[index].RegularDemandTotal;
+            int bestDemand = Data.needs[target].RegularDemandTotal;
+            if (demand > bestDemand ||
+                (demand == bestDemand && (int)services[index].Building.type < (int)services[target].Building.type))
+                target = index;
+        }
+        return target;
+    }
+
+    private void TryStartSuddenRush()
+    {
+        SuddenRushState rush = Data.suddenRush;
+        if (rush == null || !rush.IsStillToStart || Data.elapsedSeconds < rush.startSeconds) return;
+
+        int target = FindSuddenRushTarget();
+        if (target < 0)
+        {
+            rush.skipped = true;
+            SuddenRushSkipped?.Invoke(rush);
+            return;
+        }
+
+        WaveNeedData need = Data.needs[target];
+        rush.started = true;
+        rush.building = need.building;
+        rush.need = need.need;
+        need.rushUnits += rush.units;
+        need.demandTotal += rush.units;
+        need.rushArrivalRate = rush.units / rush.durationSeconds;
+        SuddenRushStarted?.Invoke(rush);
     }
 
     private void SeatWaitingUnits(WaveNeedData need)
@@ -291,6 +465,10 @@ public sealed class WaveSimulation
 
     private bool AllNeedsFinished()
     {
+        // A wave cannot finish before its rush has started and fully arrived.
+        SuddenRushState rush = Data.suddenRush;
+        if (rush != null && (rush.IsStillToStart || rush.IsArriving)) return false;
+
         foreach (WaveNeedData need in Data.needs)
         {
             if (need.demandArrived != need.demandTotal || need.QueueCount != 0 || need.OccupiedSlots != 0)

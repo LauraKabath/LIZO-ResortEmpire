@@ -37,7 +37,10 @@ public sealed class WaveNeedsPanelCollapseUI : MonoBehaviour
             gameController = FindFirstObjectByType<GameController>();
 
         if (gameController != null)
+        {
             gameController.PhaseChanged += HandlePhaseChanged;
+            gameController.SuddenRushStarted += HandleSuddenRushStarted;
+        }
     }
 
     private void Start()
@@ -51,7 +54,17 @@ public sealed class WaveNeedsPanelCollapseUI : MonoBehaviour
     private void OnDisable()
     {
         if (gameController != null)
+        {
             gameController.PhaseChanged -= HandlePhaseChanged;
+            gameController.SuddenRushStarted -= HandleSuddenRushStarted;
+        }
+    }
+
+    // The rush prompt lives in the panel, so a collapsed panel opens itself when the rush starts.
+    private void HandleSuddenRushStarted(SuddenRushState rush)
+    {
+        if (isCollapsed)
+            Expand();
     }
 
     private void OnDestroy()
@@ -131,7 +144,8 @@ public sealed class WaveNeedsPanelCollapseUI : MonoBehaviour
             return;
         }
 
-        warningIcon.SetActive(HasBottleneck());
+        // A waiting Sudden Rush prompt also needs attention while the panel is collapsed.
+        warningIcon.SetActive(HasBottleneck() || gameController.IsSuddenRushPromptOpen);
     }
 
     private bool HasBottleneck()
