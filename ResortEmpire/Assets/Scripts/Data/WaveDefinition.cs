@@ -12,6 +12,10 @@ public sealed class WaveDefinition
     public int drinks;
     public int relax;
     public int oceanView;
+    // Optional mini-event. Leave it out of Waves.json (or set units to 0) for a wave without one.
+    public SuddenRushDefinition suddenRush;
+
+    public bool HasSuddenRush => suddenRush != null && suddenRush.IsEnabled;
 
     public int GetDemand(NeedType need)
     {
@@ -31,6 +35,29 @@ public sealed class WaveDefinition
         if (waveNumber < 1 || guestCount < 0 || rooms < 0 || food < 0 ||
             drinks < 0 || relax < 0 || oceanView < 0)
             throw new ArgumentException("Wave numbers must be positive and wave counts cannot be negative.");
+        suddenRush?.Validate(waveNumber);
+    }
+}
+
+// Sudden Rush tuning for one wave. Times are wave time, so pausing moves the event with the wave.
+[Serializable]
+public sealed class SuddenRushDefinition
+{
+    public float startSeconds;    // When the rush begins, e.g. 45.
+    public int units;             // Extra need units for the unstaffed building, e.g. 6. 0 disables the rush.
+    public float durationSeconds; // The extra units arrive evenly over this time, e.g. 10.
+
+    public bool IsEnabled => units > 0;
+
+    public void Validate(int waveNumber)
+    {
+        if (units < 0)
+            throw new ArgumentException($"Wave {waveNumber}: Sudden Rush units cannot be negative.");
+        if (!IsEnabled) return;
+        if (float.IsNaN(startSeconds) || float.IsInfinity(startSeconds) || startSeconds < 0f ||
+            float.IsNaN(durationSeconds) || float.IsInfinity(durationSeconds) || durationSeconds <= 0f)
+            throw new ArgumentException(
+                $"Wave {waveNumber}: Sudden Rush needs startSeconds >= 0 and durationSeconds > 0.");
     }
 }
 

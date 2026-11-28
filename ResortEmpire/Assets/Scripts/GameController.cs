@@ -4,6 +4,8 @@ using UnityEngine;
 using UnityEngine.UI;
 
 // Scene entry point. Add this only to scenes that should run a resort session.
+// Runs before other scripts, so a loaded game is in place before any panel reads it in Start.
+[DefaultExecutionOrder(-100)]
 [DisallowMultipleComponent]
 public sealed class GameController : MonoBehaviour
 {
@@ -46,6 +48,20 @@ public sealed class GameController : MonoBehaviour
     [Header("Upgrade suggestions")] [SerializeField, Min(0f)]
     private float minimumCapacityBottleneckSeconds = 1f;
 
+    [Header("Saving")]
+    [Tooltip("Only when this scene is played directly (not from the main menu): start a fresh game " +
+             "instead of continuing the save. The fresh game then replaces the save.")]
+    [SerializeField] private bool newGameWhenPlayedDirectly;
+
+    [Tooltip("While a wave runs, also save every this many seconds (0 = off). Going to the " +
+             "background, quitting and every game action always save.")]
+    [SerializeField, Min(0f)] private float autosaveIntervalSeconds = 10f;
+
+    [Tooltip("Shown while a wave is paused. Loaded from Resources/UI/PausedOverlay when empty.")]
+    [SerializeField] private GameObject pausedOverlayPrefab;
+
+    [SerializeField] private bool logSaves = true;
+
     [Header("Energy boost")]
     [SerializeField, Min(1)] private int energyBoostCost = 3;
     [SerializeField, Min(0.1f)] private float energyBoostDurationSeconds = 15f;
@@ -68,6 +84,15 @@ public sealed class GameController : MonoBehaviour
     private WaveCatalog waveCatalog;
     private WaveSimulation waveSimulation;
     private bool upgradeSuggestionOpen;
+
+    // Save state.
+    private bool upgradeSuggestionPending; // Shown after a wave and not answered yet.
+    private bool saveRequested;
+    private string saveReason;
+    private float nextAutosaveTime;
+
+    // True when this session continued a save instead of starting a new game.
+    public bool StartedFromSave { get; private set; }
 
     public bool IsInitialized => session != null;
     public ResortData Data => resortData;
@@ -133,9 +158,350 @@ public sealed class GameController : MonoBehaviour
             return false;
 
         Data.energy -= energyBoostCost;
+        RequestSave($"{type} boosted");
         Debug.Log($"[SCRUM-205] Boosted {type} for {energyBoostDurationSeconds:F1}s " +
                   $"at x{energyBoostSpeedMultiplier:F2} speed. Cost: {energyBoostCost} Energy.", this);
         return true;
+    }
+
+    // ---------- Sudden Rush ----------
+    // The rush state lives in the active WaveData, so a saved wave restores an unanswered prompt.
+
+    public SuddenRushState SuddenRush => activeWaveData?.suddenRush;
+
+    // Shown from the moment the rush starts until the player answers or the wave ends.
+    public bool IsSuddenRushPromptOpen =>
+        IsInitialized && waveSimulation != null && !activeWaveData.isComplete &&
+        (Phase == ResortPhase.WAVE_ACTIVE || Phase == ResortPhase.WAVE_PAUSED) &&
+        activeWaveData.suddenRush != null && activeWaveData.suddenRush.IsPromptPending;
+
+    // While the wave is paused the prompt stays visible, but the player is not in the game.
+    public bool CanAnswerSuddenRush => IsSuddenRushPromptOpen && Phase == ResortPhase.WAVE_ACTIVE;
+
+    public event Action<SuddenRushState> SuddenRushStarted;
+    public event Action<SuddenRushState> SuddenRushAnswered;
+
+    // Which building the coming rush would hit right now (the unstaffed one). Only a prediction
+    // until the rush starts, because the player can still move Workers.
+    public bool TryGetLikelySuddenRushBuilding(out BuildingType building)
+    {
+        building = default;
+        return waveSimulation != null && activeWaveData != null &&
+               !activeWaveData.isComplete && waveSimulation.TryGetSuddenRushTarget(out building);
+    }
+
+    // Null when "Use Energy to serve faster" would succeed.
+    public string GetSuddenRushEnergyBlockReason()
+    {
+        if (!CanAnswerSuddenRush) return "The Sudden Rush prompt is not active.";
+        return GetEnergyBoostBlockReason(SuddenRush.building);
+    }
+
+    // "Use Energy to serve faster": the normal Speed Up on the rushed building.
+    // Nothing is spent and the prompt stays open when the boost is not possible.
+    public bool TryUseEnergyForSuddenRush(out string error)
+    {
+        error = GetSuddenRushEnergyBlockReason();
+        if (error != null) return false;
+        if (!TryActivateEnergyBoost(SuddenRush.building, out error)) return false;
+        AnswerSuddenRush(SuddenRushChoice.USE_ENERGY);
+        return true;
+    }
+
+    public bool TryIgnoreSuddenRush(out string error)
+    {
+        if (!CanAnswerSuddenRush)
+        {
+            error = "The Sudden Rush prompt is not active.";
+            return false;
+        }
+
+        error = null;
+        AnswerSuddenRush(SuddenRushChoice.IGNORE);
+        return true;
+    }
+
+    // "Move Worker here" only opens the Worker panel; the prompt is answered once a Worker
+    // actually stands on the rushed building, however it got there.
+    private void CheckSuddenRushStaffed()
+    {
+        if (!CanAnswerSuddenRush) return;
+        BuildingData building = Data.GetBuilding(SuddenRush.building);
+        if (building != null && building.assignedWorkerId != -1)
+            AnswerSuddenRush(SuddenRushChoice.MOVE_WORKER);
+    }
+
+    private void AnswerSuddenRush(SuddenRushChoice choice)
+    {
+        if (waveSimulation == null || !waveSimulation.TryAnswerSuddenRush(choice)) return;
+        Debug.Log($"[Sudden Rush] Wave {activeWaveData.waveNumber}: player chose {choice} " +
+                  $"at {activeWaveData.elapsedSeconds:F1}s for {SuddenRush.building}.", this);
+        SuddenRushAnswered?.Invoke(SuddenRush);
+        RequestSave("Sudden Rush answered");
+    }
+
+    private void HandleSuddenRushStarted(SuddenRushState rush)
+    {
+        Debug.Log($"[Sudden Rush] Wave {activeWaveData.waveNumber} @ {activeWaveData.elapsedSeconds:F1}s: " +
+                  $"+{rush.units} {rush.need} over {rush.durationSeconds:F0}s at {rush.building}.", this);
+        SuddenRushStarted?.Invoke(rush);
+        // Saved right away, so quitting before answering brings the prompt back.
+        RequestSave("Sudden Rush started");
+    }
+
+    private void HandleSuddenRushSkipped(SuddenRushState rush)
+    {
+        Debug.LogWarning($"[Sudden Rush] Wave {activeWaveData.waveNumber}: skipped, " +
+                         "every building serving this wave has a Worker.", this);
+    }
+
+    // ---------- Saving and loading ----------
+    // The save lives in Application.persistentDataPath (see SaveSystem). The game saves after every
+    // action, when a wave starts, pauses or ends, periodically during a wave, and when the app goes
+    // to the background or quits. Going to the background pauses a running wave first.
+
+    private ResortData CreateNewGameData() =>
+        initialSettings != null
+            ? ResortInitializer.CreateNewGame(initialSettings)
+            : ResortData.CreatePrototypeStart(startingCoins, startingEnergy, startingResortValue);
+
+    private SaveRules CreateSaveRules() => new SaveRules
+    {
+        WaveExists = number => waveCatalog.GetWave(number) != null,
+        MaxLevel = type => GetBuildingDefinition(type).MaxLevel,
+        CapacityAtLevel = (type, level) => GetBuildingDefinition(type).GetCapacity(level),
+        ServicedNeed = type => GetBuildingDefinition(type).ServicedNeed
+    };
+
+    // Null means "start a new game".
+    private GameSaveData ChooseStartingSave()
+    {
+        GameLaunch.Mode mode = GameLaunch.Consume();
+        if (mode == GameLaunch.Mode.NewGame)
+        {
+            SaveSystem.Delete();
+            Debug.Log("[Save] New game started from the menu; it replaces the previous save.", this);
+            return null;
+        }
+
+        if (mode == GameLaunch.Mode.Default && newGameWhenPlayedDirectly)
+        {
+            Debug.Log("[Save] 'New Game When Played Directly' is on: starting a new game.", this);
+            return null;
+        }
+
+        SaveLoadResult result = SaveSystem.Load(CreateSaveRules());
+        switch (result.Status)
+        {
+            case SaveLoadStatus.Loaded:
+                Debug.Log($"[Save] Continuing the game saved at {result.Data.savedAtUtc} (UTC) " +
+                          $"from {SaveSystem.SavePath}.", this);
+                return result.Data;
+            case SaveLoadStatus.LoadedFromBackup:
+                Debug.LogWarning($"[Save] The save was damaged ({result.Problem}); continuing from the " +
+                                 "previous save instead.", this);
+                return result.Data;
+            case SaveLoadStatus.NoSave:
+                Debug.Log("[Save] No save found: starting a new game.", this);
+                return null;
+            default:
+                Debug.LogError($"[Save] The save could not be read ({result.Problem}). Starting a new game; " +
+                               "the damaged file was kept as resort_save.corrupt.json.", this);
+                return null;
+        }
+    }
+
+    private bool TryRebuildSavedWave(GameSaveData save, out WaveSimulation simulation, out ServiceLoadMonitor loads)
+    {
+        try
+        {
+            simulation = WaveSimulation.Restore(save.wave, CreateBuildingServices(save.resort), save.boosts);
+            loads = new ServiceLoadMonitor(save.wave, save.resort, save.serviceLoads);
+            return true;
+        }
+        catch (Exception exception)
+        {
+            Debug.LogError($"[Save] The saved wave could not be restored ({exception.Message}). " +
+                           "Starting a new game.", this);
+            simulation = null;
+            loads = null;
+            return false;
+        }
+    }
+
+    // Runs before any phase event, so every panel starts from the restored state.
+    private void RestoreSavedState(GameSaveData save, WaveSimulation wave, ServiceLoadMonitor loads)
+    {
+        rewardClaimed = save.rewardClaimed;
+        if (wave != null)
+            AttachWave(wave, loads);
+
+        switch (resortData.phase)
+        {
+            // A running wave always comes back paused: nothing happened while the player was away.
+            case ResortPhase.WAVE_INCOMING:
+            case ResortPhase.WAVE_ACTIVE:
+                // A wave that had just finished is wrapped up on the first frame instead.
+                resortData.phase = activeWaveData.isComplete ? ResortPhase.WAVE_ACTIVE : ResortPhase.WAVE_PAUSED;
+                break;
+            case ResortPhase.WAVE_RESOLVING:
+                resortData.phase = ResortPhase.WAVE_ACTIVE;
+                break;
+            case ResortPhase.WAVE_COMPLETE:
+                EvaluateLongestBottleneck();
+                EvaluateUpgradeSuggestion();
+                CalculateWaveResults(activeWaveData);
+                break;
+            case ResortPhase.UPGRADE:
+                if (waveCatalog.GetWave(resortData.nextWaveNumber + 1) != null)
+                    resortData.nextWaveNumber++;
+                resortData.phase = ResortPhase.AWAITING_WAVE;
+                break;
+        }
+
+        if (resortData.phase == ResortPhase.AWAITING_WAVE && save.hasPendingUpgradeSuggestion)
+        {
+            LastUpgradeSuggestion = new UpgradeSuggestion(save.pendingSuggestionWave,
+                save.pendingSuggestionBuilding, save.pendingSuggestionSeconds);
+            upgradeSuggestionPending = true;
+        }
+
+        Debug.Log($"[Save] Restored wave {resortData.nextWaveNumber}, phase {resortData.phase}, " +
+                  $"{resortData.coins} Coins, {resortData.energy} Energy.", this);
+    }
+
+    // Windows that are normally opened by an action the player already took before saving.
+    private void AnnounceRestoredState()
+    {
+        if (Phase == ResortPhase.WAVE_COMPLETE && rewardClaimed && IsFinalWave)
+            FinalWaveRewardsClaimed?.Invoke();
+        else if (Phase == ResortPhase.AWAITING_WAVE && upgradeSuggestionPending && LastUpgradeSuggestion != null)
+            UpgradeSuggestionReady?.Invoke(LastUpgradeSuggestion);
+    }
+
+    private GameSaveData CreateSaveData()
+    {
+        // A wave exists only while it has a simulation. The serialized activeWaveData field is never
+        // null in Unity (the Inspector fills it with an empty wave), so it cannot be used as the signal.
+        bool hasWave = waveSimulation != null;
+        var save = new GameSaveData
+        {
+            savedAtUtc = DateTime.UtcNow.ToString("o"),
+            resort = resortData,
+            hasWave = hasWave,
+            wave = hasWave ? waveSimulation.Data : null,
+            rewardClaimed = rewardClaimed
+        };
+
+        if (waveSimulation != null) save.boosts = waveSimulation.CreateBoostSnapshots();
+        if (ServiceLoad != null) save.serviceLoads = ServiceLoad.CreateSnapshots();
+
+        if (Phase == ResortPhase.AWAITING_WAVE && upgradeSuggestionPending && LastUpgradeSuggestion != null)
+        {
+            save.hasPendingUpgradeSuggestion = true;
+            save.pendingSuggestionWave = LastUpgradeSuggestion.WaveNumber;
+            save.pendingSuggestionBuilding = LastUpgradeSuggestion.Building;
+            save.pendingSuggestionSeconds = LastUpgradeSuggestion.CapacityBottleneckSeconds;
+        }
+        return save;
+    }
+
+    // Collects several changes in one frame into a single write (done in LateUpdate).
+    private void RequestSave(string reason)
+    {
+        saveRequested = true;
+        saveReason = reason;
+    }
+
+    private void SaveNow(string reason)
+    {
+        saveRequested = false;
+        if (!IsInitialized || resortData == null) return;
+
+        // Short in-between phases are never written; the save follows on the next frame.
+        if (Phase == ResortPhase.WAVE_INCOMING || Phase == ResortPhase.WAVE_RESOLVING || Phase == ResortPhase.UPGRADE)
+        {
+            RequestSave(reason);
+            return;
+        }
+
+        if (!SaveSystem.TrySave(CreateSaveData(), out string error))
+            Debug.LogError($"[Save] Could not save ({reason}): {error}", this);
+        else if (logSaves)
+            Debug.Log($"[Save] Saved ({reason}): wave {resortData.nextWaveNumber}, {Phase}.", this);
+    }
+
+    private void LateUpdate()
+    {
+        if (!IsInitialized) return;
+
+        if (Phase == ResortPhase.WAVE_ACTIVE && autosaveIntervalSeconds > 0f &&
+            Time.unscaledTime >= nextAutosaveTime)
+        {
+            if (nextAutosaveTime > 0f) RequestSave("autosave during the wave");
+            nextAutosaveTime = Time.unscaledTime + autosaveIntervalSeconds;
+        }
+
+        if (saveRequested)
+            SaveNow(saveReason);
+    }
+
+    // Mobile: the app is sent to the background (home button, call, app switcher).
+    // Editor/desktop with Run In Background off: the window loses focus (e.g. Alt+Tab).
+    private void OnApplicationPause(bool paused)
+    {
+        if (paused) HandleAppHidden("app went to the background");
+    }
+
+    private void OnApplicationFocus(bool hasFocus)
+    {
+        // On phones, losing focus (notification shade, system dialog) also means the player looked away.
+        if (!hasFocus && Application.isMobilePlatform) HandleAppHidden("app lost focus");
+    }
+
+    private void OnApplicationQuit() => HandleAppHidden("app quit");
+
+    private void HandleAppHidden(string reason)
+    {
+        if (!IsInitialized || !enabled) return;
+        if (Phase == ResortPhase.WAVE_ACTIVE && !activeWaveData.isComplete)
+            session.TryPauseWave();
+        SaveNow(reason);
+    }
+
+    private void HandleWorkersChangedForSave() => RequestSave("Workers moved");
+
+    private void SpawnPausedOverlay()
+    {
+        GameObject prefab = pausedOverlayPrefab != null
+            ? pausedOverlayPrefab
+            : Resources.Load<GameObject>("UI/PausedOverlay");
+        if (prefab == null)
+        {
+            Debug.LogWarning("No paused overlay found (Resources/UI/PausedOverlay). A paused wave can only be " +
+                             "resumed with Wave/Resume Wave on the GameController.", this);
+            return;
+        }
+
+        GameObject overlay = Instantiate(prefab);
+        PausedOverlayUI ui = overlay.GetComponentInChildren<PausedOverlayUI>(true);
+        if (ui != null) ui.Bind(this);
+    }
+
+    [ContextMenu("Save/Save Now")]
+    private void SaveNowFromMenu() => SaveNow("manual");
+
+    [ContextMenu("Save/Simulate Going To Background")]
+    private void SimulateAppHidden() => HandleAppHidden("simulated background");
+
+    [ContextMenu("Save/Log Save File Location")]
+    private void LogSaveLocation() => Debug.Log($"[Save] {SaveSystem.SavePath}", this);
+
+    [ContextMenu("Save/Delete Save File")]
+    private void DeleteSaveFromMenu()
+    {
+        SaveSystem.Delete();
+        Debug.Log("[Save] Save file deleted. The next action or quit writes a new one.", this);
     }
 
     // True when no wave after the current one is configured in Waves.json.
@@ -152,11 +518,6 @@ public sealed class GameController : MonoBehaviour
     {
         try
         {
-            // Persistence will plug in here; each Play currently creates a fresh prototype.
-            resortData = initialSettings != null
-                ? ResortInitializer.CreateNewGame(initialSettings)
-                : ResortData.CreatePrototypeStart(
-                    startingCoins, startingEnergy, startingResortValue);
             LoadBuildingDefinitions();
             if (waveDefinitionsFile == null)
                 throw new InvalidOperationException("Assign the wave definitions JSON file in the Inspector.");
@@ -166,12 +527,34 @@ public sealed class GameController : MonoBehaviour
             waveCatalog.Validate();
             if (waveCatalog.rewards == null)
                 throw new InvalidOperationException("Configure reward settings in Waves.json.");
+
+            // Continue the save, or start a new game (which then replaces the save).
+            GameSaveData save = ChooseStartingSave();
+            WaveSimulation restoredWave = null;
+            ServiceLoadMonitor restoredLoads = null;
+            if (save != null && save.hasWave && !TryRebuildSavedWave(save, out restoredWave, out restoredLoads))
+                save = null;
+
+            resortData = save != null ? save.resort : CreateNewGameData();
+            ValidateBuildingLevels();
             Workers = new WorkerRoster(resortData, GetBuildingDefinition,
                 initialSettings != null ? initialSettings.WorkerCapPercent : WorkerRoster.DefaultCapPercent,
                 () => CanManageWorkers);
+            Workers.Changed += CheckSuddenRushStaffed;
+            Workers.Changed += HandleWorkersChangedForSave;
             session = new ResortSession(resortData);
             session.PhaseChanged += HandlePhaseChanged;
+            StartedFromSave = save != null;
+            if (save != null)
+                RestoreSavedState(save, restoredWave, restoredLoads);
+
+            SpawnPausedOverlay();
             HandlePhaseChanged(session.Phase);
+
+            if (save != null)
+                AnnounceRestoredState();
+            else
+                SaveNow("new game");
         }
         catch (Exception exception)
         {
@@ -186,15 +569,36 @@ public sealed class GameController : MonoBehaviour
         if (Phase != ResortPhase.WAVE_ACTIVE || waveSimulation == null) return;
         waveSimulation.Tick(Time.deltaTime);
         ServiceLoad.Update();
+        CheckSuddenRushStaffed();
         if (!activeWaveData.isComplete) return;
+        if (SuddenRush != null && SuddenRush.IsPromptPending)
+            Debug.Log($"[Sudden Rush] Wave {activeWaveData.waveNumber} ended without an answer to the prompt.", this);
         EvaluateLongestBottleneck();
         EvaluateUpgradeSuggestion();
         // Keep the completed result even if a phase listener immediately prepares the next wave.
         WaveData completedWave = activeWaveData;
         session.TryResolveWave();
         UpdateBuildingPurchaseAvailability(completedWave.waveNumber);
-        // Satisfaction and rewards
-        // Evaluate completed wave
+        CalculateWaveResults(completedWave);
+        rewardClaimed = false;
+        Debug.Log(
+            $"Wave {completedWave.waveNumber} evaluation: " +
+            $"{LastWaveEvaluation.Stars}/5 stars, " +
+            $"satisfaction {LastWaveEvaluation.SatisfactionPercent:F1}%.\n" +
+            $"{LastWaveEvaluation.Success}\n" +
+            $"{LastWaveEvaluation.AreaToImprove}",
+            this);
+        session.TryCompleteWave();
+        Debug.Log(
+            $"Wave {completedWave.waveNumber} complete after {completedWave.elapsedSeconds:F2}s: all generated needs served.",
+            this);
+    }
+
+
+    // Satisfaction and rewards of a finished wave. Deterministic, so a loaded save that stopped
+    // on the Wave Complete screen gets exactly the same result again.
+    private void CalculateWaveResults(WaveData completedWave)
+    {
         LastWaveEvaluation = WaveEvaluator.Evaluate(completedWave, evaluationSettings);
         WaveRewardResult baseReward = WaveRewardCalculator.Calculate(
             completedWave,
@@ -215,20 +619,7 @@ public sealed class GameController : MonoBehaviour
             baseReward.Coins,
             baseReward.Energy,
             valueGain);
-        rewardClaimed = false;
-        Debug.Log(
-            $"Wave {completedWave.waveNumber} evaluation: " +
-            $"{LastWaveEvaluation.Stars}/5 stars, " +
-            $"satisfaction {LastWaveEvaluation.SatisfactionPercent:F1}%.\n" +
-            $"{LastWaveEvaluation.Success}\n" +
-            $"{LastWaveEvaluation.AreaToImprove}",
-            this);
-        session.TryCompleteWave();
-        Debug.Log(
-            $"Wave {completedWave.waveNumber} complete after {completedWave.elapsedSeconds:F2}s: all generated needs served.",
-            this);
     }
-
 
     public int GetResortValueGainForInvestment(int costCoins)
     {
@@ -296,6 +687,7 @@ public sealed class GameController : MonoBehaviour
             return false;
 
         Data.resortValue += gain;
+        RequestSave($"{type} bought");
         return true;
     }
 
@@ -343,6 +735,7 @@ public sealed class GameController : MonoBehaviour
         Debug.Log($"Upgraded {type} to level {building.level} for " +
                   $"{definition.GetCostCoins(building.level)} Coins.", this);
         BuildingUpgraded?.Invoke(type);
+        RequestSave($"{type} upgraded");
         return true;
     }
 
@@ -503,6 +896,13 @@ public sealed class GameController : MonoBehaviour
 
     public void SetUpgradeSuggestionOpen(bool isOpen)
     {
+        // Answered (Later or Upgrade Now): it no longer comes back after loading.
+        if (upgradeSuggestionOpen && !isOpen && upgradeSuggestionPending)
+        {
+            upgradeSuggestionPending = false;
+            RequestSave("upgrade suggestion answered");
+        }
+
         upgradeSuggestionOpen = isOpen;
         RefreshStartWaveButton();
     }
@@ -548,25 +948,16 @@ public sealed class GameController : MonoBehaviour
         WaveSimulation nextSimulation;
         try
         {
-            var services = new List<WaveBuildingService>();
             foreach (BuildingData building in Data.buildings)
             {
                 BuildingDefinition definition = GetBuildingDefinition(building.type);
-                if (!building.owned)
-                {
-                    if (wave.GetDemand(definition.ServicedNeed) > 0)
-                        Debug.Log(
-                            $"Wave {wave.waveNumber}: {building.type} must be purchased before it can serve {definition.ServicedNeed}.",
-                            this);
-                    continue;
-                }
-
-                services.Add(new WaveBuildingService(building, definition.ServicedNeed,
-                    definition.GetCapacity(building.level), definition.ServiceTimeSeconds,
-                    definition.UtilizationWithoutWorker));
+                if (!building.owned && wave.GetDemand(definition.ServicedNeed) > 0)
+                    Debug.Log(
+                        $"Wave {wave.waveNumber}: {building.type} must be purchased before it can serve {definition.ServicedNeed}.",
+                        this);
             }
 
-            nextSimulation = new WaveSimulation(wave, waveDurationSeconds, services);
+            nextSimulation = new WaveSimulation(wave, waveDurationSeconds, CreateBuildingServices(Data));
         }
         catch (Exception exception)
         {
@@ -574,22 +965,45 @@ public sealed class GameController : MonoBehaviour
             return;
         }
 
-        DetachWaveSimulation();
         LastWaveBottleneck = null;
         LastWaveBottleneckSeconds = 0d;
-        waveSimulation = nextSimulation;
         LastUpgradeSuggestion = null;
-        activeWaveData = nextSimulation.Data;
-        waveSimulation.NeedGenerated += HandleNeedGenerated;
-        waveSimulation.ArrivalsClosed += HandleArrivalsClosed;
-        ServiceLoad = new ServiceLoadMonitor(activeWaveData, Data);
-        ServiceLoad.StateChanged += HandleServiceLoadChanged;
+        upgradeSuggestionPending = false;
+        AttachWave(nextSimulation, new ServiceLoadMonitor(nextSimulation.Data, Data));
         session.TryStartWave();
         // There is no incoming presentation yet, so enter the active phase immediately.
         session.TryBeginWave();
         Debug.Log(
             $"Wave {wave.waveNumber} started: {wave.guestCount} guests; needs arrive over {waveDurationSeconds:F2}s.",
             this);
+    }
+
+    // Services of the owned buildings, in building order (a saved wave relies on the same order).
+    private List<WaveBuildingService> CreateBuildingServices(ResortData resort)
+    {
+        var services = new List<WaveBuildingService>();
+        foreach (BuildingData building in resort.buildings)
+        {
+            if (!building.owned) continue;
+            BuildingDefinition definition = GetBuildingDefinition(building.type);
+            services.Add(new WaveBuildingService(building, definition.ServicedNeed,
+                definition.GetCapacity(building.level), definition.ServiceTimeSeconds,
+                definition.UtilizationWithoutWorker));
+        }
+        return services;
+    }
+
+    private void AttachWave(WaveSimulation simulation, ServiceLoadMonitor loads)
+    {
+        DetachWaveSimulation();
+        waveSimulation = simulation;
+        activeWaveData = simulation.Data;
+        waveSimulation.NeedGenerated += HandleNeedGenerated;
+        waveSimulation.ArrivalsClosed += HandleArrivalsClosed;
+        waveSimulation.SuddenRushStarted += HandleSuddenRushStarted;
+        waveSimulation.SuddenRushSkipped += HandleSuddenRushSkipped;
+        ServiceLoad = loads;
+        ServiceLoad.StateChanged += HandleServiceLoadChanged;
     }
 
     [ContextMenu("Wave/Pause Wave")]
@@ -633,6 +1047,7 @@ public sealed class GameController : MonoBehaviour
 
         rewardClaimed = true;
         error = null;
+        RequestSave("rewards claimed");
         Debug.Log($"Claimed wave {LastWaveReward.WaveNumber} rewards: " +
                   $"{LastWaveReward.Coins} Coins, {LastWaveReward.Energy} Energy, " +
                   $"{LastWaveReward.ResortValue} Resort Value.", this);
@@ -659,7 +1074,9 @@ public sealed class GameController : MonoBehaviour
             if (Phase == ResortPhase.AWAITING_WAVE &&
                 LastUpgradeSuggestion != null)
             {
+                upgradeSuggestionPending = true;
                 UpgradeSuggestionReady?.Invoke(LastUpgradeSuggestion);
+                RequestSave("upgrade suggestion shown");
             }
         }
     }
@@ -725,6 +1142,7 @@ public sealed class GameController : MonoBehaviour
         LastWaveBottleneck = null;
         LastWaveBottleneckSeconds = 0d;
         LastUpgradeSuggestion = null;
+        upgradeSuggestionPending = false;
         rewardClaimed = false;
         UpdateBuildingPurchaseAvailability(waveNumber - 1);
         session.PrepareWaveForTesting(waveNumber);
@@ -764,6 +1182,10 @@ public sealed class GameController : MonoBehaviour
             definitions.Add(definition.Type, definition);
         }
 
+    }
+
+    private void ValidateBuildingLevels()
+    {
         foreach (BuildingData building in Data.buildings)
         {
             if (!definitions.TryGetValue(building.type, out BuildingDefinition definition))
@@ -814,6 +1236,10 @@ public sealed class GameController : MonoBehaviour
         RefreshStartWaveButton();
 
         PhaseChanged?.Invoke(phase);
+
+        if (phase == ResortPhase.AWAITING_WAVE || phase == ResortPhase.WAVE_ACTIVE ||
+            phase == ResortPhase.WAVE_PAUSED || phase == ResortPhase.WAVE_COMPLETE)
+            RequestSave($"phase {phase}");
     }
 
     private void DetachWaveSimulation()
@@ -821,13 +1247,17 @@ public sealed class GameController : MonoBehaviour
         if (waveSimulation == null) return;
         waveSimulation.NeedGenerated -= HandleNeedGenerated;
         waveSimulation.ArrivalsClosed -= HandleArrivalsClosed;
+        waveSimulation.SuddenRushStarted -= HandleSuddenRushStarted;
+        waveSimulation.SuddenRushSkipped -= HandleSuddenRushSkipped;
         if (ServiceLoad != null) ServiceLoad.StateChanged -= HandleServiceLoadChanged;
     }
 
     private void OnDestroy()
     {
         DetachWaveSimulation();
+        if (Workers != null)
+            Workers.Changed -= CheckSuddenRushStaffed;
         if (session != null)
             session.PhaseChanged -= HandlePhaseChanged;
     }
-}
+}

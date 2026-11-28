@@ -17,6 +17,15 @@ public enum NeedType
     OceanView
 }
 
+// The player's answer to the Sudden Rush prompt. NONE means it is still waiting for an answer.
+public enum SuddenRushChoice
+{
+    NONE,
+    MOVE_WORKER,
+    USE_ENERGY,
+    IGNORE
+}
+
 public enum ResortPhase
 {
     AWAITING_WAVE,

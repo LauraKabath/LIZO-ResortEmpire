@@ -57,14 +57,51 @@ public sealed class ServiceLoadMonitor
 
     public event Action<ServiceLoad> StateChanged;
 
-    public ServiceLoadMonitor(WaveData wave, ResortData resort)
+    public ServiceLoadMonitor(WaveData wave, ResortData resort, IReadOnlyList<ServiceLoadSaveData> saved = null)
     {
         this.wave = wave ?? throw new ArgumentNullException(nameof(wave));
         this.resort = resort ?? throw new ArgumentNullException(nameof(resort));
         foreach (WaveNeedData need in wave.needs)
             loads.Add(new ServiceLoad(need.need, need.building));
+
+        // A loaded wave keeps its bottleneck history, so the upgrade suggestion stays correct.
+        if (saved != null && saved.Count == loads.Count)
+        {
+            for (int index = 0; index < loads.Count; index++)
+            {
+                ServiceLoadSaveData source = saved[index];
+                ServiceLoad load = loads[index];
+                if (source == null || source.need != load.Need) continue;
+                load.State = source.state;
+                load.Cause = source.cause;
+                load.PeakQueue = source.peakQueue;
+                load.SecondsAsBottleneck = source.secondsAsBottleneck;
+                load.SecondsMissingWorker = source.secondsMissingWorker;
+                load.SecondsInsufficientCapacity = source.secondsInsufficientCapacity;
+            }
+        }
+
         lastUpdateSeconds = wave.elapsedSeconds;
         Update();
+    }
+
+    public List<ServiceLoadSaveData> CreateSnapshots()
+    {
+        var snapshots = new List<ServiceLoadSaveData>();
+        foreach (ServiceLoad load in loads)
+        {
+            snapshots.Add(new ServiceLoadSaveData
+            {
+                need = load.Need,
+                state = load.State,
+                cause = load.Cause,
+                peakQueue = load.PeakQueue,
+                secondsAsBottleneck = load.SecondsAsBottleneck,
+                secondsMissingWorker = load.SecondsMissingWorker,
+                secondsInsufficientCapacity = load.SecondsInsufficientCapacity
+            });
+        }
+        return snapshots;
     }
 
     public ServiceLoad Get(NeedType need) => loads.Find(load => load.Need == need);
@@ -100,7 +137,8 @@ public sealed class ServiceLoadMonitor
             int queue = need.QueueCount;
             load.QueueCount = queue;
             load.PeakQueue = Math.Max(load.PeakQueue, queue);
-            load.ArrivalRate = wave.arrivalsClosed ? 0 : need.arrivalRate;
+            // Sudden Rush units arrive on top of the regular rate and can outlast the arrival window.
+            load.ArrivalRate = (wave.arrivalsClosed ? 0 : need.arrivalRate) + need.rushArrivalRate;
             load.ServiceRate = need.fillRate;
             load.ServiceRateWithWorker = need.capacity / need.serviceTimeSeconds;
 

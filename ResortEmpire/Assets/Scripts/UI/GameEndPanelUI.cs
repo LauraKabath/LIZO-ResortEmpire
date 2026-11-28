@@ -92,7 +92,13 @@ public sealed class GameEndPanelUI : MonoBehaviour
         panelRoot.SetActive(true);
     }
 
-    public void PlayAgain() => SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    // The finished game is still the saved game, so the reloaded scene must start a new one
+    // (which also replaces the save); otherwise it would continue straight back to this screen.
+    public void PlayAgain()
+    {
+        GameLaunch.Request(GameLaunch.Mode.NewGame);
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
 
     public void GoToMainMenu()
     {

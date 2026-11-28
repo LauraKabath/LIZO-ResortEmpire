@@ -78,6 +78,7 @@ public sealed class WaveNeedsPanel : MonoBehaviour
 
     private void HandlePhaseChanged(ResortPhase phase)
     {
+        Debug.Log($"Needs panel heard: {phase}");
         bool visible = phase == ResortPhase.WAVE_ACTIVE || phase == ResortPhase.WAVE_PAUSED;
         panelRoot.SetActive(visible);
         if (visible)
@@ -198,6 +199,30 @@ public sealed class WaveNeedsPanel : MonoBehaviour
 
         if (workerAllocationPanel != null)
             workerAllocationPanel.Open(load.Building);
+    }
+
+    // Used by the Sudden Rush prompt to sit beside the rushed need's row.
+    public RectTransform GetVisibleRowRect(NeedType need)
+    {
+        foreach (Row row in rows)
+        {
+            if (row.need == need && row.root != null && row.root.activeInHierarchy)
+                return row.root.transform as RectTransform;
+        }
+        return null;
+    }
+
+    // Opens the Worker panel with the building preselected (as the target when it has no Worker).
+    public bool TryOpenWorkerAllocation(BuildingType building)
+    {
+        if (workerAllocationPanel == null)
+        {
+            Debug.LogWarning("Assign the Worker Allocation panel on the Wave Needs Panel.", this);
+            return false;
+        }
+
+        workerAllocationPanel.Open(building);
+        return true;
     }
 
     private string GetLabel(NeedType need)
