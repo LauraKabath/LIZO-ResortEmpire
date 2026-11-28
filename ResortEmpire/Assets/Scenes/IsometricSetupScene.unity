@@ -4692,6 +4692,10 @@ MonoBehaviour:
   resortValuePerStar: 10
   resortValueInvestmentPercent: 10
   minimumCapacityBottleneckSeconds: 1
+  newGameWhenPlayedDirectly: 0
+  autosaveIntervalSeconds: 10
+  pausedOverlayPrefab: {fileID: 5349979066121302517, guid: 01df58ba443200bea88076a1aaee3d3d, type: 3}
+  logSaves: 1
   energyBoostCost: 3
   energyBoostDurationSeconds: 15
   energyBoostSpeedMultiplier: 2

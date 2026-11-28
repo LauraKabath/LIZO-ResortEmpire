@@ -54,8 +54,9 @@ public class MainMenuController : MonoBehaviour
             : Resources.Load<ConfirmDialogUI>("UI/ConfirmDialog");
         if (prefab == null)
         {
-            Debug.LogWarning("No confirm dialog found (Resources/UI/ConfirmDialog); starting the new game directly.", this);
-            StartNewGame();
+            Debug.LogError(
+                "ConfirmDialog prefab is missing. New Game was cancelled to protect the existing save.",
+                this);
             return;
         }
 
